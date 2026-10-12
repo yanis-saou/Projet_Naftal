@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>NAFTAL - Système de Gestion (Cartes & CIB)</title>
+
+
+  <!-- jsPDF (generer decharge)-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- Chart.js (dashboard) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet.js (la carte geographique)-->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+
+
+
+
+  <!-- JS -->
+  <script src="api.js"></script>
+  <script src="scope.js"></script>
+  <script src="core.js"></script>
+  <script src="renderers.js"></script>
+  <script src="cards.js"></script>
+  <script src="tpe.js"></script>
+  <script src="pdf-report.js"></script>
+  <script src="init.js"></script>
+
+</head>
+
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="naftal-logo.png" alt="NAFTAL" />
+        <span>NAFTAL — Connexion</span>
+      </div>
+      <p>Accès sécurisé au système.</p>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label>Email</label>
+          <input id="loginUser" type="email" autofocus placeholder="adresse@email.com" />
+        </div>
+
+        <div class="field full">
+          <label>Mot de passe</label>
+
+          <div style="position: relative;">
+            <input id="loginPass" type="password" placeholder="••••••••" />
+            <button type="button" class="password-toggle" id="loginPassToggle" title="Afficher / masquer mot de passe">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+
+          <div id="login-error" class="login-error"></div>
+
+        </div>
+        <div class="login-checkbox">
+          <input type="checkbox" id="loginRemember" />
+          <label for="loginRemember">Se souvenir de moi</label>
+        </div>
+        
+<a href="#" id="forgotPassLink" onclick="showForgotPasswordForm()">Mot de passe oublié ?</a>
+
+      </div>
+
+
+
+      <div class="login-actions">
+        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
+          <i class="fa-solid fa-right-to-bracket"></i>Se connecter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <button class="burger" id="burgerBtn" title="Menu"><i class="fa-solid fa-bars"></i></button>
+
+    <div class="brand">
+      <img src="naftal-logo.png" alt="NAFTAL" style="height:40px;object-fit:contain;">
+      <span>Système de Gestion - NAFTAL</span>
+    </div>
+
+    <div class="nav-actions">
+     <button class="theme-toggle" id="themeBtn" title="Thème"></button>
+
+      <div class="notif-wrap">
+        <button class="icon-btn" id="notifBtn" title="Notifications">
+          <i class="fa-regular fa-bell"></i>
+        </button>
+        <span class="badge-pill" id="notifCount">3</span>
+      </div>
+
+      <div class="profile-menu">
+        <button class="icon-btn" id="profileBtn" title="Profil">
+          <span class="avatar" id="avatar">AD</span>
+        </button>
+        <div class="dropdown" id="profileDropdown">
+          <button class="dd-item" onclick="openMyProfile()"><i class="fa-regular fa-user"></i>Mon profil</button>
+          <button class="dd-item" onclick="switchUser()"><i class="fa-solid fa-users"></i>Changer d’utilisateur</button>
+          <button class="dd-item" onclick="logout()"><i
+              class="fa-solid fa-arrow-right-from-bracket"></i>Déconnexion</button>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="profile-meta">
+          <span id="currentUserName">—</span>
+          <small id="currentUserRole">—</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR-->
+  <aside class="sidebar" id="sidebar">
+    <div class="group-title">Dashboard</div>
+    <a class="nav-link active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i>Tableau de bord</a>
+
+    <!-- Gestion cartes NAFTALCARD (pliable principal) -->
+    <div class="group-title">NAFTALCARD</div>
+
+    <div class="nav-tree">
+      <a class="nav-link nav-toggle-only" onclick="toggleNavSubmenu('submenu-naftalcard',this)"
+        style="cursor:pointer;"><i class="fa-solid fa-credit-card"></i>Gestion cartes NAFTALCARD <button
+          class="nav-caret" type="button" title="Afficher / masquer">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button></a>
+    </div>
+
+    <div class="nav-submenu" id="submenu-naftalcard" style="display:none;">
+
+      <!-- Stock Cartes (pliable sous-niveau) -->
+
+      <div class="nav-tree">
+        <a class="nav-link nav-toggle-only" onclick="toggleNavSubmenu('submenu-cards',this)"
+          style="margin-left:10px; cursor:pointer;"><i class="fa-solid fa-id-card"></i>Stock Cartes
+          <button class="nav-caret" type="button" title="Afficher / masquer">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button></a>
+      </div>
+
+      <div class="nav-submenu" id="submenu-cards" style="display:none;">
+        <a class="nav-link" data-page="naftalcard-nouvelle" style="margin-left:32px;"><i
+            class="fa-solid fa-plus-circle"></i>Nouvelle NAFTALCARD</a>
+        <a class="nav-link" data-page="naftalcard-renouvelee" style="margin-left:32px;"><i
+            class="fa-solid fa-rotate"></i>NAFTALCARD Renouvelée</a>
+      </div>
+
+      <a class="nav-link" data-page="cards-circulation" style="margin-left:22px;"><i
+          class="fa-solid fa-arrows-spin"></i>Cartes en circulation</a>
+      <a class="nav-link" data-page="cards-suivi" style="margin-left:22px;"><i class="fa-solid fa-route"></i>Suivi
+        Cartes</a>
+
+      <a class="nav-link" data-page="cards-decharges" style="margin-left:22px;"><i
+          class="fa-solid fa-file-signature"></i>Décharges Cartes</a>
+
+      <a class="nav-link" data-page="cards-archive" style="margin-left:22px;"><i
+          class="fa-solid fa-box-archive"></i>Archive</a>
+
+    </div>
+
+    <!-- Menu TPE (pliable) -->
+    <div class="group-title">TPE CIB</div>
+
+    <div class="nav-tree">
+      <a class="nav-link nav-toggle-only" onclick="toggleNavSubmenu('submenu-gestion-tpe',this)"
+        style="cursor:pointer;"><i class="fa-solid fa-mobile-screen-button"></i>Gestion TPE CIB <button
+          class="nav-caret" type="button" title="Afficher / masquer">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button></a>
+    </div>
+    <div class="nav-submenu" id="submenu-gestion-tpe" style="display:none;">
+      <div class="nav-tree">
+        <a class="nav-link" data-page="tpe" style="margin-left:10px;"><i class="fa-solid fa-box-open"></i>Stock TPE</a>
+      </div>
+      <div class="nav-submenu" id="submenu-tpe" style="display:none;">
+      </div>
+      <a class="nav-link" data-page="commandes" style="margin-left:22px;"><i
+          class="fa-solid fa-cart-shopping"></i>Commande TPE</a>
+      <a class="nav-link" data-page="tpe-service" style="margin-left:22px;"><i class="fa-solid fa-arrows-spin"></i>TPE
+        en service</a>
+      <a class="nav-link" data-page="tpe-suivi" style="margin-left:22px;"><i class="fa-solid fa-route"></i>Suivi TPE</a>
+      <a class="nav-link" data-page="tpe-decharges" style="margin-left:22px;"><i
+          class="fa-solid fa-file-signature"></i>Décharges TPE</a>
+    </div>
+
+    <div class="group-title">Référentiel</div>
+
+    <a class="nav-link" data-page="stations"><i class="fa-solid fa-gas-pump"></i>Stations</a>
+
+    <div class="group-title admin-only">Gestion utilisateurs</div>
+    <a class="nav-link admin-only" data-page="admin"><i class="fa-solid fa-user-shield"></i>Administration</a>
+  </aside>
+
+
+
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="dashboard-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Tableau de bord</div>
+          <div class="page-subtitle">Vue synthétique (NAFTALCARD + CIB) — alertes & activité</div>
+        </div>
+        <div class="header-actions">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('naftalcard-nouvelle')">
+          <div class="kpi">
+            <div class="value" id="kpiCards">—</div>
+            <div class="label">Cartes (Total)</div>
+            <div class="trend positive"><i class="fa-solid fa-arrow-trend-up"></i><span id="kpiCardsTrend">+—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('cards-circulation')">
+          <div class="kpi">
+            <div class="value" id="kpiCardsActive">—</div>
+            <div class="label">Cartes en circulation</div>
+            <div class="trend positive"><i class="fa-solid fa-circle-check"></i><span id="kpiCardsOk">Taux OK —</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('tpe')">
+          <div class="kpi">
+            <div class="value" id="kpiTpe">—</div>
+            <div class="label">TPE (Total)</div>
+            <div class="trend positive"><i class="fa-solid fa-box"></i><span id="kpiTpeStock">En stock —</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('tpe-service')">
+          <div class="kpi">
+            <div class="value" id="kpiTpeActive">—</div>
+            <div class="label">TPE en service</div>
+            <div class="trend positive"><i class="fa-solid fa-plug-circle-check"></i><span id="kpiTpeRate">Taux —
+                %</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('tpe-decharges')">
+          <div class="kpi">
+            <div class="value" id="kpiTransfersTPE">—</div>
+            <div class="label">Décharges TPE</div>
+            <div class="trend positive"><i class="fa-solid fa-truck"></i><span id="kpiTransfersTPECount">—</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 3; cursor:pointer;" onclick="go('cards-decharges')">
+          <div class="kpi">
+            <div class="value" id="kpiTransfersCarte">—</div>
+            <div class="label">Décharges Cartes</div>
+            <div class="trend positive"><i class="fa-solid fa-file-signature"></i><span id="kpiTransfersCarteCount">—</span></div>
+          </div>
+        </div>
+
+
+
+        <div class="card" style="grid-column: span 12;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 id="graphTitle">Évolution des utilisations — Cartes</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-primary" id="graphCardsBtn" onclick="switchGraph('cards')">
+                <i class="fa-solid fa-id-card"></i> Cartes
+              </button>
+              <button class="btn btn-sm btn-ghost" id="graphTpeBtn" onclick="switchGraph('tpe')">
+                <i class="fa-solid fa-mobile-screen-button"></i> TPE
+              </button>
+            </div>
+          </div>
+          <div id="chartContainer" style="height: 220px; position: relative;">
+            <canvas id="usageChart"></canvas>
+          </div>
+        </div>
+
+
+        <div class="card" style="grid-column: span 12;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>Alertes prioritaires</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-primary" id="alertCardsBtn" onclick="switchAlerts('all')">
+                <i class="fa-solid fa-layer-group"></i> Toutes
+              </button>
+              <button class="btn btn-sm btn-ghost" id="alertOnlyCardsBtn" onclick="switchAlerts('cards')">
+                <i class="fa-solid fa-id-card"></i> Cartes
+              </button>
+              <button class="btn btn-sm btn-ghost" id="alertOnlyTpeBtn" onclick="switchAlerts('tpe')">
+                <i class="fa-solid fa-mobile-screen-button"></i> TPE
+              </button>
+            </div>
+          </div>
+          <div class="chip-row" id="alertsChips"></div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="openAlertsModal()"><i class="fa-solid fa-list-check"></i>Voir
+              toutes les alertes</button>
+          </div>
+        </div>
+
+        <!-- Carte Algérie Leaflet -->
+        <div class="card" style="grid-column: span 12;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>
+              <i class="fa-solid fa-map-location-dot"></i>
+              Répartition géographique - Stations NAFTAL
+            </h3>
+
+          </div>
+          <div id="algeriaMap" style="height: 500px; width: 100%; border-radius: 8px;"></div>
+        </div>
+
+      </div>
+    </section>
+
+
+
+
+
+
+    <!-- NOUVELLE NAFTALCARD -->
+    <section class="page" id="naftalcard-nouvelle-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Nouvelle NAFTALCARD</div>
+          <div class="page-subtitle">Stock cartes nouvelles</div>
+        </div>
+
+        <div class="header-actions">
+
+          <button class="btn btn-success requires-write" onclick="triggerCardsImport()"><i
+              class="fa-solid fa-file-import"></i>Importer</button>
+
+          <input type="file" id="cardsImportInput" accept=".csv" style="display:none" />
+        </div>
+
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsStockKpiTotal">0</div>
+            <div class="label">Cartes en circulation</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsStockKpiStock">0</div>
+            <div class="label">Nouvelle cartes en stock</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsStockKpiRate">0%</div>
+            <div class="label">Taux d'utilisation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="cardsSearch" placeholder="Rechercher..." oninput="renderCards()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleCardsAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetCardsFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="cardsAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field">
+            <label>Type carte</label>
+            <select id="cardsType" onchange="renderCards()">
+              <option value="">Tous types</option>
+
+              <option value="Matriculé">Matriculé</option>
+              <option value="Numéroté">Numéroté</option>
+              <option value="Nominatif">Nominatif</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>District</label>
+            <select id="cardsDistrict" onchange="renderCards()">
+              <option value="">Tous districts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Date réception (début)</label>
+            <input type="date" id="cardsDateReceptionDebut" onchange="renderCards()">
+          </div>
+          <div class="field">
+            <label>Date réception (fin)</label>
+            <input type="date" id="cardsDateReceptionFin" onchange="renderCards()">
+          </div>
+        </div>
+      </div>
+
+      <div class="bulk-bar" id="cardsBulkBar"
+        style="display:none; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+        <span class="muted"><i class="fa-solid fa-square-check"></i> Sélection active</span>
+        <button class="btn btn-ghost requires-write" onclick="toggleSelectAllVisibleCards(true)"><i
+            class="fa-solid fa-check"></i>Tout sélectionner</button>
+        <button class="btn btn-ghost requires-write" onclick="toggleSelectAllVisibleCards(false)"><i
+            class="fa-solid fa-xmark"></i>Tout désélectionner</button>
+        <button class="btn btn-ghost requires-write" onclick="clearCardsSelection()"><i
+            class="fa-solid fa-trash"></i>Vider sélection</button>
+        <button class="btn btn-primary requires-write" onclick="bulkSetSelectedCardsToCirculation()"><i
+            class="fa-solid fa-circle-check"></i>Mettre en circulation</button>
+      </div>
+
+      <div class="card">
+        <div class="chip-row" id="cardsSummary"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="cardsSelectTh" style="display:none; width: 42px;"><input type="checkbox" id="cardsSelectAll"
+                    title="Tout sélectionner" onchange="toggleSelectAllVisibleCards(this.checked)" /></th>
+                <th>N° Carte</th>
+                <th>État</th>
+                <th>Type carte</th>
+                <th>Structure</th>
+                <th>Code structure</th>
+                <th>Code client</th>
+                <th>Raison sociale client</th>
+                <th>N° Porteur</th>
+                <th>Date réception</th>
+                <th>Date expiration</th>
+                <th>Amortissement</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cardsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAFTALCARD RENOUVELÉE -->
+    <section class="page" id="naftalcard-renouvelee-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">NAFTALCARD Renouvelée</div>
+          <div class="page-subtitle">Stock cartes renouvelées </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-success requires-write" onclick="triggerRenouvCardsImport()"><i
+              class="fa-solid fa-file-import"></i>Importer</button>
+          <input type="file" id="renouvCardsImportInput" accept=".csv" style="display:none" />
+
+        </div>
+
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="renouvCardsKpiTotal">0</div>
+            <div class="label">Cartes renouvelées visibles</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="renouvCardsKpiStock">0</div>
+            <div class="label">Cartes en circulation</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="renouvCardsKpiRate">0%</div>
+            <div class="label">Taux d'utilisation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="renouvCardsSearch" placeholder="Rechercher..." oninput="renderRenouvCards()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleRenouvCardsAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetRenouvCardsFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="renouvCardsAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field">
+
+            <label>Type carte</label>
+            <select id="renouvCardsType" onchange="renderRenouvCards()">
+              <option value="">Tous types</option>
+              <option value="Matriculé">Matriculé</option>
+              <option value="Numéroté">Numéroté</option>
+              <option value="Nominatif">Nominatif</option>
+            </select>
+
+          </div>
+
+          <div class="field">
+            <label>District</label>
+            <select id="renouvCardsDistrict" onchange="renderRenouvCards()">
+              <option value="">Tous districts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Date réception (début)</label>
+            <input type="date" id="renouvCardsDateReceptionDebut" onchange="renderRenouvCards()">
+          </div>
+          <div class="field">
+            <label>Date réception (fin)</label>
+            <input type="date" id="renouvCardsDateReceptionFin" onchange="renderRenouvCards()">
+          </div>
+        </div>
+      </div>
+
+
+
+
+      <div class="card" id="renouvCardsSummary"></div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="table-wrap">
+
+          <table>
+            <thead>
+              <tr>
+                <th id="renouvCardsSelectTh" style="display:none; width: 42px;"><input type="checkbox"
+                    id="renouvCardsSelectAll" title="Tout sélectionner"
+                    onchange="toggleSelectAllVisibleRenouvCards(this.checked)" /></th>
+
+
+                <th>N° Carte</th>
+                <th>État</th>
+                <th>Type carte</th>
+                <th>Structure</th>
+                <th>Code structure</th>
+                <th>Code client</th>
+                <th>Raison sociale client</th>
+                <th>N° Porteur</th>
+                <th>Date réception</th>
+                <th>Date expiration</th>
+                <th>Amortissement</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="renouvCardsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARTES EN CIRCULATION -->
+    <section class="page" id="cards-circulation-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Cartes en circulation</div>
+          <div class="page-subtitle">Cartes actives — restitution, historique, décharges associées</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="circulationSearch" placeholder="N° carte, client, structure..."
+            oninput="renderCardsCirculation()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleCirculationAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetCirculationFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="circulationAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field">
+            <label>District</label>
+            <select id="circulationDistrict" onchange="renderCardsCirculation()">
+              <option value="">Tous districts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>État</label>
+            <select id="circulationStatus" onchange="renderCardsCirculation()">
+              <option value="">Tous états</option>
+              <option value="En circulation">En circulation</option>
+              <option value="En cours traitement">En cours traitement</option>
+              <option value="Défectueuse">Défectueuse</option>
+              <option value="Expirée">Expirée</option>
+              <option value="Expire bientôt">Expire bientôt</option>
+              <option value="Perdue">Perdue</option>
+              <option value="Volée">Volée</option>
+              <option value="Bloquée">Bloquée</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:6px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Carte</th>
+                <th>état</th>
+                <th>Type carte</th>
+                <th>Structure</th>
+                <th>Code structure</th>
+
+                <th>Code client</th>
+                <th>Raison sociale client</th>
+                <th>N° Décharge</th>
+                <th>Date sortie</th>
+                <th>Amortissement</th>
+                <th>Date réception</th>
+                <th>N° BTS</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="circulationBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STOCK CARTES -->
+    <section class="page" id="cards-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Stock Cartes</div>
+          <div class="page-subtitle">Ce menu sert uniquement à ouvrir / fermer les sous-menus.</div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="muted" style="margin:0;">Utilisez les sous-menus <strong>Nouvelle NAFTALCARD</strong> et
+          <strong>NAFTALCARD Renouvelée</strong>.</p>
+      </div>
+    </section>
+
+
+
+    <!-- SUIVI CARTES -->
+    <section class="page" id="cards-suivi-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Suivi Cartes</div>
+          <div class="page-subtitle">Cartes en anomalie / traitement — envoi DCSI, retour, décharges</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost requires-write" id="suiviSelectBtn" onclick="toggleSuiviSelectionMode()"><i
+              class="fa-solid fa-square-check"></i>Sélectionner</button>
+          <button class="btn btn-warning requires-write" id="suiviEnvoiBtn" style="display:none;"
+            onclick="openEnvoiDcsiModal()"><i class="fa-solid fa-paper-plane"></i>Envoyer pour traitement</button>
+        </div>
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsSuiviKpiTotal">0</div>
+            <div class="label">Cartes en suivi</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsSuiviKpiProcess">0</div>
+            <div class="label">En cours traitement</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="cardsSuiviKpiAlerts">0</div>
+            <div class="label">Anomalies / alertes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="cardsSuiviSearch" placeholder="NC-... / filtre..." oninput="renderCardsSuivi()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleSuiviCardsAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetSuiviCardsFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="suiviCardsAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field">
+            <label>District</label>
+            <select id="cardsSuiviDistrict" onchange="renderCardsSuivi()">
+              <option value="">Tous districts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>État</label>
+            <select id="cardsSuiviStatus" onchange="renderCardsSuivi()">
+              <option value="">Tous états</option>
+              <option value="En cours traitement">En cours traitement</option>
+              <option value="Défectueuse">Défectueuse</option>
+              <option value="Perdue">Perdue</option>
+              <option value="Volée">Volée</option>
+              <option value="Bloquée">Bloquée</option>
+              <option value="Expirée">Expirée</option>
+              <option value="Expire bientôt">Expire bientôt</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="suiviSelectTh" style="display:none; width:42px;"><input type="checkbox" id="suiviSelectAll"
+                    title="Tout sélectionner" onchange="toggleSelectAllVisibleCardsSuivi(this.checked)" /></th>
+                <th>N° Carte</th>
+                <th>État de panne</th>
+                <th>Structure</th>
+                <th>Code structure</th>
+
+                <th>Code client</th>
+                <th>Date anomalie</th>
+                <th>Carte substitution</th>
+                
+                <th>Envoi DPE→DCSI</th>
+                <th>Retour DCSI→DPE</th>
+                
+                <th> Durée traitement</th>
+                <th>Diagnostic</th>
+                <th>Objet diagnostic</th>
+               
+                <th>Validé par</th>
+                <th>Date validation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cardsSuiviBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- DÉCHARGES CARTES -->
+    <section class="page" id="cards-decharges-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Décharges Cartes</div>
+          <div class="page-subtitle">Génération PDF automatique (Type 1 / 2 / 3) selon De / Vers (DSCI)</div>
+        </div>
+        <div class="header-actions">
+          
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label>Date minimum</label>
+          <input id="cardsDechargesDateFilter" type="date" onchange="renderCardsDecharges()" oninput="renderCardsDecharges()">
+        </div>
+        <div class="field" style="justify-content:flex-end;">
+          <label style="visibility:hidden;">Réinitialiser</label>
+          <button class="btn btn-ghost" onclick="el('cardsDechargesDateFilter').value=''; renderCardsDecharges()"><i
+              class="fa-solid fa-rotate"></i>Réinitialiser</button>
+        </div>
+      </div>
+
+
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Décharge</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Bénéficiaire</th>
+                <th>Fonction</th>
+                <th>Date sortie</th>
+                <th>Date création</th>
+                <th>Motif transfert</th>
+                <th>N° Bordereau BTS</th>
+                <th>PDF</th>
+              </tr>
+            </thead>
+            <tbody id="cardsDechargesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ARCHIVE CARTES -->
+    <section class="page" id="cards-archive-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Archive cartes</div>
+          <div class="page-subtitle">Cartes archivées (défectueuses / volées / perdues) — consultation</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="cardsArchiveSearch" placeholder="NC-... / filtre..."
+            oninput="renderCardsArchive()" />
+        </div>
+        <button class="btn btn-ghost" onclick="exportCardsArchiveCSV()"><i
+            class="fa-solid fa-file-arrow-down"></i>Exporter</button>
+        <button class="btn btn-ghost requires-write" onclick="clearCardsArchive()"><i
+            class="fa-solid fa-trash"></i>Vider archive</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+
+                <th>Date archivage</th>
+                <th>Carte</th>
+                <th>État</th>
+                <th>Structure</th>
+                <th>Propriétaire</th>
+                <th>N° BTS</th>
+                <th>Motif</th>
+                <th>Utilisateur</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cardsArchiveBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+
+
+    <!-- TPE EN SERVICE -->
+    <section class="page" id="tpe-service-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">TPE en service</div>
+          <div class="page-subtitle">Suivi des TPE affectés — restitution, historique et décharges associées</div>
+        </div>
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeServiceKpiTotal">0</div>
+            <div class="label">TPE en service</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeServiceKpiActive">0</div>
+            <div class="label">Décharges actives</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeServiceKpiAlerts">0</div>
+            <div class="label">En cours de traitement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+
+        <div class="control"><i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="tpeServiceSearch"
+            placeholder="N° série, terminal, compte, contrat, nom commercial..." oninput="renderTpeService()" />
+        </div>
+
+        
+
+        <button class="btn btn-primary" type="button" onclick="toggleTpeServiceAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetTpeServiceFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="tpeServiceAdvancedFilters" style="display:none; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field"><label>Station</label>
+            <select id="tpeServiceNomStation" onchange="renderTpeService()">
+              <option value="">Toutes stations</option>
+            </select>
+          </div>
+          <div class="field"><label>Structure</label>
+            <select id="tpeServiceStructure" onchange="renderTpeService()">
+              <option value="">Toutes structures</option>
+            </select>
+          </div>
+          <div class="field"><label>Tarification</label><select id="tpeServiceTarification"
+              onchange="renderTpeService()">
+              <option value="">Toutes</option>
+            </select></div>
+          <div class="field"><label>État</label><select id="tpeServiceStatus" onchange="renderTpeService()">
+              <option value="">Tous états</option>
+              <option value="En service">En service</option>
+              <option value="En panne">En panne</option>
+              <option value="En traitement">En traitement</option>
+              <option value="Volé">Volé</option>
+            </select></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:6px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Structure</th>
+                <th>IDTPE</th>
+                <th>état</th>
+                <th>N° Série TPE</th>
+                <th>Modèle</th>
+
+                <th>Code structure</th>
+
+                <th>Wilaya</th>
+                <th>Code station</th>
+
+                <th>Adresse</th>
+
+                <th>N° Compte bancaire</th>
+                <th>Date réception</th>
+                <th>Date remise</th>
+                <th>Amortissement</th>
+
+
+
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tpeServiceBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STOCK TPE -->
+    <section class="page" id="tpe-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Stock TPE</div>
+          <div class="page-subtitle">Gestion du parc TPE — stock, affectation et transferts</div>
+        </div>
+        <div class="header-actions">
+
+          <input type="file" id="tpeImportInput" accept=".csv" style="display:none" />
+          <button class="btn btn-ghost requires-write" id="tpeStockSelectBtn" onclick="toggleTpeStockSelectionMode()"><i
+              class="fa-solid fa-square-check"></i>Sélectionner</button>
+          <button class="btn btn-primary requires-write" id="tpeStockServiceBtn" style="display:none;"
+            onclick="openTpeMiseEnServiceModal()"><i class="fa-solid fa-circle-check"></i>Mettre en service</button>
+        </div>
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeStockKpiTotal">0</div>
+            <div class="label">TPE personnalisés</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeStockKpiStock">0</div>
+            <div class="label">TPE en stock</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeStockKpiRate">0%</div>
+            <div class="label">Taux d'utilisation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="tpeSearch" placeholder="Rechercher..." oninput="renderTpe()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleTpeAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetTpeFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="tpeAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field"><label>Station</label>
+            <select id="tpeStockStation" onchange="renderTpe()">
+              <option value="">Toutes stations</option>
+            </select>
+          </div>
+          <div class="field"><label>Structure</label>
+            <select id="tpeStockStructure" onchange="renderTpe()">
+              <option value="">Toutes structures</option>
+            </select>
+          </div>
+          <div class="field"><label>Tarification</label>
+            <select id="tpeTarification" onchange="renderTpe()">
+              <option value="">Toutes</option>
+              <option value="Standard">Standard</option>
+              <option value="Premium">Premium</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="tpeSummary" style="margin-top:12px;">
+        <div class="chip-row" id="tpeSummaryContent"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="tpeStockSelectTh" style="display:none; width: 42px;"><input type="checkbox" id="tpeSelectAll"
+                    title="Tout sélectionner" onchange="toggleSelectAllVisibleTpe(this.checked)" /></th>
+                <th>N° Série TPE</th>
+                <th>État TPE</th>
+                <th>IDTPE</th>
+                <th>Modèle</th>
+                <th>Date réception</th>
+                <th>Amortissement</th>
+                <th>Adresse</th>
+                <th>Structure</th>
+                <th>N° Commande </th>
+
+                <th>Code structure</th>
+
+                <th>Wilaya</th>
+                <th>Code station</th>
+                <th>N° série SIM</th>
+                <th>Adresse IP SIM</th>
+                <th>N° tél SIM</th>
+                <th>Date remise</th>
+
+                <th>Tarification</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tpeBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUIVI TPE -->
+    <section class="page" id="tpe-suivi-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Suivi TPE</div>
+          <div class="page-subtitle">TPE en anomalie / traitement — historique, transferts et restitution</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost requires-write" id="tpeSuiviSelectBtn" onclick="toggleTpeSuiviSelectionMode()"><i
+              class="fa-solid fa-square-check"></i>Sélectionner</button>
+          <button class="btn btn-warning requires-write" id="tpeSuiviEnvoiBtn" style="display:none;"
+            onclick="openTpeEnvoiTraitementModal()"><i class="fa-solid fa-paper-plane"></i>Envoyer pour
+            traitement</button>
+        </div>
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeSuiviKpiTotal">0</div>
+            <div class="label">TPE suivis</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeSuiviKpiMaintenance">0</div>
+            <div class="label">En traitement</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 4;">
+          <div class="kpi">
+            <div class="value" id="tpeSuiviKpiTransit">0</div>
+            <div class="label">En panne / volé</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="tpeSuiviSearch" placeholder="TPE-... / filtre..." oninput="renderTpeSuivi()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleTpeSuiviAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetTpeSuiviFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="tpeSuiviAdvancedFilters" style="display:none; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field"><label>État</label><select id="tpeSuiviStatus" onchange="renderTpeSuivi()">
+              <option value="">Tous</option>
+              <option value="En panne">En panne</option>
+              <option value="En traitement">En traitement</option>
+              <option value="Volé">Volé</option>
+              <option value="Réservé">Réservé</option>
+            </select></div>
+          <div class="field"><label>Structure</label><select id="tpeSuiviStation" onchange="renderTpeSuivi()">
+              <option value="">Toutes structures</option>
+            </select></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="tpeSuiviSelectTh" style="display:none; width: 42px;"><input type="checkbox"
+                    id="tpeSuiviSelectAll" title="Tout sélectionner"
+                    onchange="toggleSelectAllVisibleTpeSuivi(this.checked)" /></th>
+                <th>IDTPE</th>
+                <th>N° Série TPE</th>
+                <th>État de panne</th>
+                <th>Date panne</th>
+                <th>Structure</th>
+                <th>Code station</th>
+                <th>Diagnostic</th>
+                <th>Durée traitement</th>
+                <th>N° Compte bancaire</th>
+                <th>Modèle TPE</th>
+                <th>Objet diagnostic</th>
+                <th>DPE→BEA</th>
+                <th>BEA→DPE</th>
+                <th>TPE substitution</th>
+                <th>Validé par</th>
+                <th>Date validation</th>                
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tpeSuiviBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- DÉCHARGES TPE -->
+    <section class="page" id="tpe-decharges-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Décharges TPE</div>
+          <div class="page-subtitle">Décharges PDF générées lors des affectations et transferts TPE</div>
+        </div>
+        <div class="header-actions">
+         
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label>Date minimum</label>
+          <input id="tpeDechargesDateFilter" type="date" onchange="renderTpeDecharges()" oninput="renderTpeDecharges()">
+        </div>
+        <div class="field" style="justify-content:flex-end;">
+          <label style="visibility:hidden;">Réinitialiser</label>
+          <button class="btn btn-ghost" onclick="el('tpeDechargesDateFilter').value=''; renderTpeDecharges()"><i
+              class="fa-solid fa-rotate"></i>Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Décharge</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Bénéficiaire</th>
+                <th>Fonction</th>
+                <th>Date sortie</th>
+                <th>Date création</th>
+                <th>N° Inventaire</th>
+                <th>PDF</th>
+              </tr>
+            </thead>
+            <tbody id="tpeDechargesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- COMMANDE TPE -->
+    <section class="page" id="commandes-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Commande TPE</div>
+          <div class="page-subtitle">Gestion des commandes TPE — import/export, validation des réceptions</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost requires-write" onclick="exportCommandesCSV()"><i
+              class="fa-solid fa-file-csv"></i>Exporter CSV</button>
+          <button class="btn btn-success requires-write" onclick="triggerCommandesImport()"><i
+              class="fa-solid fa-file-import"></i>Importer commande</button>
+          <input type="file" id="commandesImportInput" accept=".csv" style="display:none" />
+        </div>
+      </div>
+
+      <div class="grid section-kpis">
+        <div class="card" style="grid-column: span 3;">
+          <div class="kpi">
+            <div class="value" id="cmdKpiTotal">0</div>
+            <div class="label">Commandes totales</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 3;">
+          <div class="kpi">
+            <div class="value" id="cmdKpiEnAttente">0</div>
+            <div class="label">En attente</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 3;">
+          <div class="kpi">
+            <div class="value" id="cmdKpiRecues">0</div>
+            <div class="label">Reçues</div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 3;">
+          <div class="kpi">
+            <div class="value" id="cmdKpiAnnuLEes">0</div>
+            <div class="label">Annulées</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="commandesSearch" placeholder="Référence, fournisseur, modèle..."
+            oninput="renderCommandes()" />
+        </div>
+        <button class="btn btn-primary" type="button" onclick="toggleCommandesAdvancedFilters()"><i
+            class="fa-solid fa-filter"></i>Filtres avancés</button>
+        <button class="btn btn-ghost" onclick="resetCommandesFilters()"><i
+            class="fa-solid fa-rotate"></i>Réinitialiser</button>
+        <button class="btn btn-primary requires-commande-write" onclick="openNewCommandeModal()"><i
+            class="fa-solid fa-plus"></i>Nouvelle commande</button>
+      </div>
+
+      <div class="card advanced-filters-card" id="commandesAdvancedFilters"
+        style="display:none; margin-top:12px; margin-bottom:12px;">
+        <div class="advanced-filters-grid">
+          <div class="field">
+            <label>Statut</label>
+            <select id="commandesStatus" onchange="renderCommandes()">
+              <option value="">Tous statuts</option>
+              <option value="En attente">En attente</option>
+              <option value="Reçue">Reçue</option>
+              <option value="Annulée">Annulée</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Date commande (de)</label>
+            <input type="date" id="commandesDateFrom" onchange="renderCommandes()" />
+          </div>
+          <div class="field">
+            <label>Date commande (à)</label>
+            <input type="date" id="commandesDateTo" onchange="renderCommandes()" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Commande</th>
+                <th>Adresse</th>
+                <th>code station</th>
+                <th>Modèle</th>
+                <th>Quantité</th>
+                <th>Date commande</th>
+                <th>Statut</th>
+                <th>Date prévue</th>
+                <th>Date validation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="commandesBody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </section>
+
+
+
+
+
+
+    <!-- STATIONS -->
+    <section class="page" id="stations-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Stations</div>
+          <div class="page-subtitle">Référentiel stations</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="input" id="stationSearch" placeholder="Rechercher..." oninput="renderStations()" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Code</th>
+                <th>Wilaya</th>
+                <th>Structure</th>
+                <th>Code structure</th>
+                <th>Évolution</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stationsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ADMIN -->
+    <section class="page" id="admin-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion Utilisateurs</div>
+          <div class="page-subtitle">Ajout, affectation de rôles et désactivation des comptes</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary requires-write" onclick="openAddUserModal()"><i
+              class="fa-solid fa-user-plus"></i>Ajouter utilisateur</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card admin-only" style="grid-column: span 12;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <h3>Demandes de reinitialisation</h3>
+            <button class="btn btn-ghost btn-sm" onclick="refreshPasswordResetRequests()">
+              <i class="fa-solid fa-rotate"></i>Actualiser
+            </button>
+          </div>
+          <div class="table-wrap" style="margin-top:10px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date demande</th>
+                  <th>Utilisateur</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Structure</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="resetRequestsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 12;">
+          <h3>Utilisateurs</h3>
+          <div class="table-wrap" style="margin-top:10px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom complet</th>
+                  <th>Nom d'utilisateur</th>
+                  <th>Rôle</th>
+                  <th>Structure</th>
+                  <th>Statut compte</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 12;">
+          <h3>Journal d'audit</h3>
+          <div class="table-wrap" style="margin-top:10px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Horodatage</th>
+                  <th>Action</th>
+                  <th>target</th>
+                  <th>Utilisateur</th>
+                </tr>
+              </thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastText">OK</span></div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h4 id="modalTitle">Modal</h4>
+        <button class="close-x" id="closeModalX"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+</body>
+
+</html>

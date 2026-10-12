@@ -1,0 +1,621 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model structure {
+  idstructure                                                                Int                          @id @default(autoincrement())
+  code                                                                       String                       @unique @db.VarChar(50)
+  nom_structure                                                              String                       @unique @db.VarChar(255)
+  type_structure                                                             String?                      @db.VarChar(50)
+  adresse                                                                    String?
+  code_parent                                                                String?                      @db.VarChar(50)
+  circulation_carte                                                          circulation_carte[]
+  circulation_tpe                                                            circulation_tpe[]
+  commande_cib                                                               commande_cib[]
+  ligne_decharge_carte_type1                                                 ligne_decharge_carte_type1[]
+  ligne_decharge_carte_type2_ligne_decharge_carte_type2_structureTostructure ligne_decharge_carte_type2[] @relation("ligne_decharge_carte_type2_structureTostructure")
+  ligne_decharge_carte_type3_ligne_decharge_carte_type3_structureTostructure ligne_decharge_carte_type3[] @relation("ligne_decharge_carte_type3_structureTostructure")
+  ligne_decharge_tpe_type1                                                   ligne_decharge_tpe_type1[]
+  ligne_decharge_tpe_type2_ligne_decharge_tpe_type2_structureTostructure     ligne_decharge_tpe_type2[]   @relation("ligne_decharge_tpe_type2_structureTostructure")
+  ligne_decharge_tpe_type3                                                   ligne_decharge_tpe_type3[]
+  station                                                                    station[]
+  stock_carte                                                                stock_carte[]
+  stock_tpe_stock_tpe_code_structureTostructure                              stock_tpe[]                  @relation("stock_tpe_code_structureTostructure")
+  stock_tpe_stock_tpe_districtTostructure                                    stock_tpe[]                  @relation("stock_tpe_districtTostructure")
+  structure                                                                  structure?                   @relation("structureTostructure", fields: [code_parent], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  other_structure                                                            structure[]                  @relation("structureTostructure")
+  suivi_maintenance_cartes                                                   suivi_maintenance_cartes[]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_districtTostructure            suivi_maintenance_tpe[]      @relation("suivi_maintenance_tpe_districtTostructure")
+  suivi_maintenance_tpe_suivi_maintenance_tpe_structure_concerneTostructure  suivi_maintenance_tpe[]      @relation("suivi_maintenance_tpe_structure_concerneTostructure")
+  utilisateur_utilisateur_code_structureTostructure                          utilisateur[]                @relation("utilisateur_code_structureTostructure")
+  utilisateur                                                                utilisateur[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model commande_cib {
+  id                     Int                  @id @default(autoincrement())
+  numero_commande        String               @unique @db.VarChar(50)
+  code_station           String?              @db.VarChar(50)
+  raison_sociale         String?              @db.VarChar(255)
+  n_compte_bancaire      String?              @db.VarChar(50)
+  date_commande          DateTime?            @default(dbgenerated("CURRENT_DATE")) @db.Date
+  statut                 String?              @default("EN_COURS") @db.VarChar(20)
+  id_structure_emmetrice Int?
+  id_validateur_dpe      Int?
+  date_validation        DateTime?            @db.Timestamp(6)
+  station                station?             @relation(fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  structure              structure?           @relation(fields: [id_structure_emmetrice], references: [idstructure], onDelete: NoAction, onUpdate: NoAction)
+  Status                 Status?              @relation(fields: [statut], references: [libelle], onDelete: NoAction)
+  email_queue            email_queue[]
+  ligne_commande_cib     ligne_commande_cib[]
+  stock_tpe              stock_tpe[]
+
+  @@index([id_structure_emmetrice])
+  @@index([statut])
+}
+
+model decharge_carte {
+  id_decharge_carte     Int                 @id @default(autoincrement())
+  numero_decharge       String              @unique @db.VarChar(50)
+  source                String?             @db.VarChar(100)
+  destination           String?             @db.VarChar(100)
+  nom_beneficiaire      String?             @db.VarChar(100)
+  fonction_beneficiaire String?             @db.VarChar(100)
+  date_sortie           DateTime?           @default(dbgenerated("CURRENT_DATE")) @db.Date
+  date_creation         DateTime?           @db.Date
+  motif_transfert       String?             @db.VarChar(100)
+  numero_bordereau_bts  String?             @db.VarChar(50)
+  circulation_carte     circulation_carte[]
+}
+
+model decharge_tpe {
+  id_decharge_tpe          Int                        @id @default(autoincrement())
+  numero_decharge          String                     @unique @db.VarChar(50)
+  source                   String?                    @db.VarChar(100)
+  destination              String?                    @db.VarChar(100)
+  nom_beneficiaire         String?                    @db.VarChar(100)
+  fonction_beneficiaire    String?                    @db.VarChar(100)
+  date_sortie              DateTime?                  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  date_creation            DateTime?                  @db.Date
+  numero_inventaire        String?                    @db.VarChar
+  ligne_decharge_tpe_type1 ligne_decharge_tpe_type1[]
+  ligne_decharge_tpe_type2 ligne_decharge_tpe_type2[]
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3[]
+}
+
+model historique_carte {
+  id_historique      Int       @id @default(autoincrement())
+  numerocarte        String?   @db.VarChar(50)
+  ancienetat         String?   @db.VarChar(50)
+  nouveletat         String?   @db.VarChar(50)
+  dateoperation      DateTime? @default(now()) @db.Timestamp(6)
+  commentaire        String?
+  id_utilisateur     Int?
+  structure_ancienne String?
+  structure_actuelle String?
+
+  @@index([numerocarte])
+}
+
+model historique_tpe {
+  id_historique  Int       @id @default(autoincrement())
+  numeroserietpe String?   @db.VarChar(50)
+  ancienetat     String?   @db.VarChar(50)
+  nouveletat     String?   @db.VarChar(50)
+  dateoperation  DateTime? @default(now()) @db.Timestamp(6)
+  commentaire    String?
+  id_utilisateur Int?
+
+  @@index([numeroserietpe])
+}
+
+model ligne_decharge_carte_type1 {
+  id_ligne_c1         Int          @id @default(autoincrement())
+  numero_decharge     String       @db.VarChar(50)
+  numero_carte        String?      @db.VarChar(50)
+  structure_concernee String?      @db.VarChar(100)
+  district_concerne   String?      @db.VarChar(100)
+  commentaire         String?
+  code_client         String?      @db.VarChar(50)
+  raisonsocialeclient String?      @db.VarChar(255)
+  stock_carte         stock_carte? @relation(fields: [numero_carte], references: [numerocarte], onDelete: NoAction, onUpdate: NoAction)
+  structure           structure?   @relation(fields: [structure_concernee], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ligne_decharge_carte_type2 {
+  id_ligne_c2                                               Int          @id @default(autoincrement())
+  numero_decharge                                           String?      @db.VarChar(50)
+  numero_carte                                              String?      @db.VarChar(50)
+  anomalie_constatee                                        String?
+  raisonsocialeclient                                       String?      @db.VarChar
+  structure                                                 String?      @db.VarChar
+  stock_carte                                               stock_carte? @relation(fields: [numero_carte], references: [numerocarte], onDelete: NoAction, onUpdate: NoAction)
+  structure_ligne_decharge_carte_type2_structureTostructure structure?   @relation("ligne_decharge_carte_type2_structureTostructure", fields: [structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ligne_decharge_carte_type3 {
+  id_ligne_c3                                               Int          @id @default(autoincrement())
+  numero_decharge                                           String?      @db.VarChar(50)
+  numero_carte_origine                                      String?      @db.VarChar(50)
+  carte_substitution                                        String?      @db.VarChar(50)
+  diagnostic_carte                                          String?      @db.VarChar
+  etat_final                                                String?      @db.VarChar(50)
+  structure                                                 String?      @db.VarChar
+  etat_carte                                                etat_carte?  @relation(fields: [etat_final], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  stock_carte                                               stock_carte? @relation(fields: [numero_carte_origine], references: [numerocarte], onDelete: NoAction, onUpdate: NoAction)
+  structure_ligne_decharge_carte_type3_structureTostructure structure?   @relation("ligne_decharge_carte_type3_structureTostructure", fields: [structure], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ligne_decharge_tpe_type1 {
+  id_ligne_t1         Int          @id @default(autoincrement())
+  numero_decharge     String       @db.VarChar(50)
+  numero_serie_tpe    String?      @db.VarChar(50)
+  id_tpe_logiciel     String?      @db.VarChar(50)
+  structure_concernee String?      @db.VarChar(100)
+  district_concerne   String?      @db.VarChar(100)
+  commentaire         String?
+  code_station        String?      @db.VarChar
+  raison_sociale      String?      @db.VarChar
+  station             station?     @relation(fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  decharge_tpe        decharge_tpe @relation(fields: [numero_decharge], references: [numero_decharge], onDelete: NoAction, onUpdate: NoAction)
+  stock_tpe           stock_tpe?   @relation(fields: [numero_serie_tpe], references: [numeroserietpe], onDelete: NoAction, onUpdate: NoAction)
+  structure           structure?   @relation(fields: [structure_concernee], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ligne_decharge_tpe_type2 {
+  id_ligne_t2                                             Int           @id @default(autoincrement())
+  numero_decharge                                         String?       @db.VarChar(50)
+  numero_serie_tpe                                        String?       @db.VarChar(50)
+  anomalie_constatee                                      String?
+  code_station                                            String?       @db.VarChar
+  structure                                               String?       @db.VarChar
+  raison_sociale                                          String?       @db.VarChar
+  station                                                 station?      @relation(fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  decharge_tpe                                            decharge_tpe? @relation(fields: [numero_decharge], references: [numero_decharge], onDelete: NoAction, onUpdate: NoAction)
+  stock_tpe                                               stock_tpe?    @relation(fields: [numero_serie_tpe], references: [numeroserietpe], onDelete: NoAction, onUpdate: NoAction)
+  structure_ligne_decharge_tpe_type2_structureTostructure structure?    @relation("ligne_decharge_tpe_type2_structureTostructure", fields: [structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ligne_decharge_tpe_type3 {
+  id_ligne_t3                  Int                    @id @default(autoincrement())
+  numero_decharge              String?                @db.VarChar(50)
+  numero_serie_tpe             String?                @db.VarChar(50)
+  diagnostic_tpe               String?
+  etat_final                   String?                @db.VarChar(50)
+  numero_serietpe_substitution String?                @db.VarChar
+  code_station                 String?                @db.VarChar
+  raison_sociale               String?                @db.VarChar
+  n_serie_sim                  String?                @db.VarChar
+  n_serie_sim_substitution     String?                @db.VarChar
+  structure_concerne           String?                @db.VarChar
+  station                      station?               @relation(fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  etat_tpe                     etat_tpe?              @relation(fields: [etat_final], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  decharge_tpe                 decharge_tpe?          @relation(fields: [numero_decharge], references: [numero_decharge], onDelete: NoAction, onUpdate: NoAction)
+  suivi_maintenance_tpe        suivi_maintenance_tpe? @relation(fields: [numero_serie_tpe], references: [numeroserietpe], onDelete: NoAction, onUpdate: NoAction)
+  structure                    structure?             @relation(fields: [structure_concerne], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model station {
+  idstation                                                              Int                        @id @default(autoincrement())
+  code_station                                                           String                     @unique @db.VarChar(50)
+  nom_station                                                            String?                    @db.VarChar(255)
+  idstructure                                                            Int?
+  district                                                               String?                    @db.VarChar(100)
+  wilaya                                                                 String?                    @db.VarChar(100)
+  adresse                                                                String?
+  n_compte_bancaire                                                      String                     @unique(map: "unique_compte_bancaire") @db.VarChar(50)
+  latitude                                                               Float?
+  longitude                                                              Float?
+  circulation_tpe_circulation_tpe_code_stationTostation                  circulation_tpe[]          @relation("circulation_tpe_code_stationTostation")
+  circulation_tpe_circulation_tpe_n_compte_bancaireTostation             circulation_tpe[]          @relation("circulation_tpe_n_compte_bancaireTostation")
+  commande_cib                                                           commande_cib[]
+  ligne_decharge_tpe_type1                                               ligne_decharge_tpe_type1[]
+  ligne_decharge_tpe_type2                                               ligne_decharge_tpe_type2[]
+  ligne_decharge_tpe_type3                                               ligne_decharge_tpe_type3[]
+  structure                                                              structure?                 @relation(fields: [idstructure], references: [idstructure], onDelete: NoAction, onUpdate: NoAction)
+  stock_tpe                                                              stock_tpe[]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_code_stationTostation      suivi_maintenance_tpe[]    @relation("suivi_maintenance_tpe_code_stationTostation")
+  suivi_maintenance_tpe_suivi_maintenance_tpe_n_compte_bancaireTostation suivi_maintenance_tpe[]    @relation("suivi_maintenance_tpe_n_compte_bancaireTostation")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model stock_carte {
+  numerocarte                                   String                       @id @unique @db.VarChar(50)
+  district                                      String?                      @db.VarChar(100)
+  code_structure                                String?                      @db.VarChar(50)
+  raisonsocialestructure                        String?                      @db.VarChar(255)
+  code_client                                   String?                      @db.VarChar(50)
+  raisonsocialeclient                           String?                      @db.VarChar(255)
+  numeroporteur                                 String?                      @db.VarChar(50)
+  date_reception                                DateTime?                    @default(dbgenerated("CURRENT_DATE")) @db.Date
+  date_expiration                               DateTime?                    @db.Date
+  date_remise                                   DateTime?                    @db.Date
+  amortissement                                 Int?
+  statut                                        String?                      @default("Entree") @db.VarChar(50)
+  type_carte                                    String?                      @db.VarChar(50)
+  seuil_minimum                                 Int?                         @default(10)
+  etat                                          String?                      @default("EN_STOCK") @db.VarChar
+  id_porteur                                    Int?
+  nature_carte                                  String?                      @db.VarChar
+  libelle_entite                                String?
+  circulation_carte                             circulation_carte[]
+  ligne_decharge_carte_type1                    ligne_decharge_carte_type1[]
+  ligne_decharge_carte_type2                    ligne_decharge_carte_type2[]
+  ligne_decharge_carte_type3                    ligne_decharge_carte_type3[]
+  structure                                     structure?                   @relation(fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  etat_carte                                    etat_carte?                  @relation(fields: [etat], references: [libelle], onDelete: Cascade)
+  type_carte_stock_carte_type_carteTotype_carte type_carte?                  @relation("stock_carte_type_carteTotype_carte", fields: [type_carte], references: [libelle], onDelete: Cascade)
+
+  @@index([etat])
+  @@index([nature_carte])
+  @@index([district])
+  @@index([code_structure])
+  @@map("stock_carte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model stock_tpe {
+  numeroserietpe                                String                     @id @db.VarChar(50)
+  idtpe                                         String?                    @unique @db.VarChar(50)
+  operateur_mobile                              String?                    @db.VarChar(50)
+  nomcommercial                                 String?                    @db.VarChar(255)
+  date_reception                                DateTime?                  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  date_expiration                               DateTime?                  @db.Date
+  amortissement                                 Int?
+  n_contrat                                     String?                    @db.VarChar(50)
+  adresse                                       String?
+  district                                      String                     @db.VarChar
+  code_structure                                String?                    @db.VarChar
+  raisonsocialestructure                        String?                    @db.VarChar
+  wilaya                                        String?                    @db.VarChar
+  code_station                                  String                     @db.VarChar
+  numero_serie_sim                              String                     @db.VarChar
+  adresse_IP_SIM                                String                     @db.VarChar
+  n_telephone_SIM                               String                     @db.VarChar
+  date_remise                                   DateTime?                  @db.Date
+  dotation                                      String                     @db.VarChar
+  etat_tpe                                      String                     @db.VarChar
+  circulation_tpe                               circulation_tpe?
+  ligne_commande_cib                            ligne_commande_cib[]
+  ligne_decharge_tpe_type1                      ligne_decharge_tpe_type1[]
+  ligne_decharge_tpe_type2                      ligne_decharge_tpe_type2[]
+  station                                       station                    @relation(fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  structure_stock_tpe_code_structureTostructure structure?                 @relation("stock_tpe_code_structureTostructure", fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  structure_stock_tpe_districtTostructure       structure                  @relation("stock_tpe_districtTostructure", fields: [district], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+  type_tpe                                      type_tpe                   @relation(fields: [dotation], references: [libelle], onDelete: Cascade)
+  etat_tpe_stock_tpe_etat_tpeToetat_tpe         etat_tpe                   @relation("stock_tpe_etat_tpeToetat_tpe", fields: [etat_tpe], references: [libelle], onDelete: Cascade)
+  commande_cib                                  commande_cib?              @relation(fields: [n_contrat], references: [numero_commande], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([code_station])
+  @@index([code_structure])
+  @@index([district])
+  @@index([etat_tpe])
+  @@index([n_contrat])
+}
+
+model suivi_maintenance_cartes {
+  id_suivi                                                     Int                   @id @default(autoincrement())
+  district                                                     String?               @db.VarChar(100)
+  numerocarte                                                  String?               @db.VarChar(50)
+  date_anomalie                                                DateTime?             @default(dbgenerated("CURRENT_DATE")) @db.Date
+  etat_panne                                                   String?               @db.VarChar(50)
+  numerocartesubstitution                                      String?               @db.VarChar(50)
+  trs_dcsi_dpe                                                 DateTime?
+  trs_dpe_dcsi                                                 DateTime?
+  trs_dpe_str                                                  DateTime?
+  trs_str_dpe                                                  DateTime?
+  code_structure                                               String?               @db.VarChar(50)
+  raisonsocialestructure                                       String?               @db.VarChar(255)
+  code_client                                                  String?               @db.VarChar(50)
+  raisonsocialeclient                                          String?               @db.VarChar(255)
+  id_mode                                                      Int?
+  diagnostique                                                 String?               @db.VarChar(100)
+  objet_dia                                                    String?               @db.VarChar(255)
+  duree_trait                                                  Int?
+  duree_imobil                                                 Int?
+  valide_par                                                   String?               @db.VarChar(100)
+  date_validation                                              DateTime?             @db.Date
+  id_circulation                                               Int?
+  archivee_carte                                               archivee_carte[]
+  circulation_carte                                            circulation_carte?    @relation(fields: [id_circulation], references: [id_circulation], onDelete: NoAction, onUpdate: NoAction, map: "fk_circulation")
+  mode_operation_carte                                         mode_operation_carte? @relation(fields: [id_mode], references: [id_mode], onDelete: NoAction, onUpdate: NoAction, map: "fk_mode_operation")
+  structure                                                    structure?            @relation(fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction, map: "fk_structure_maintenance")
+  etat_carte_suivi_maintenance_cartes_diagnostiqueToetat_carte etat_carte?           @relation("suivi_maintenance_cartes_diagnostiqueToetat_carte", fields: [diagnostique], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  etat_carte_suivi_maintenance_cartes_etat_panneToetat_carte   etat_carte?           @relation("suivi_maintenance_cartes_etat_panneToetat_carte", fields: [etat_panne], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([date_validation])
+  @@index([numerocarte])
+}
+
+model suivi_maintenance_tpe {
+  id_suivi                                                                        Int                        @id @default(autoincrement())
+  idtpe                                                                           String?                    @db.VarChar(50)
+  date_panne                                                                      DateTime?                  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  diagnostic                                                                      String?                    @db.VarChar
+  etat_panne                                                                      String?                    @default("EN_COURS") @db.VarChar(50)
+  duree_trait                                                                     Int?
+  duree_immobilisation                                                            Int?
+  code_station                                                                    String                     @db.VarChar
+  raisonsociale                                                                   String                     @db.VarChar
+  numeroserietpe                                                                  String?                    @unique @db.VarChar
+  n_compte_bancaire                                                               String?                    @db.VarChar
+  modele_tpe                                                                      String?                    @db.VarChar
+  objet_dia                                                                       String?                    @db.VarChar
+  trs_st_str                                                                      DateTime?                  @db.Date
+  trs_str_dpe                                                                     DateTime?                  @db.Date
+  trs_dpe_bea                                                                     DateTime                   @db.Date
+  trs_bea_dpe                                                                     DateTime                   @db.Date
+  trs_dpe_str                                                                     DateTime?                  @db.Date
+  trs_str_st                                                                      DateTime?                  @db.Date
+  n_serie_tpe_substitution                                                        String?                    @db.VarChar
+  n_serie_sim_substitution                                                        String?                    @db.VarChar
+  mode_operation_tpe                                                              String?                    @db.VarChar
+  mode_operation                                                                  String?                    @db.VarChar
+  valide_par                                                                      String?                    @db.VarChar
+  date_validation                                                                 DateTime?                  @db.Date
+  district                                                                        String?                    @db.VarChar
+  structure_concerne                                                              String?                    @db.VarChar
+  ligne_decharge_tpe_type3                                                        ligne_decharge_tpe_type3[]
+  station_suivi_maintenance_tpe_code_stationTostation                             station                    @relation("suivi_maintenance_tpe_code_stationTostation", fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  etat_tpe_suivi_maintenance_tpe_diagnosticToetat_tpe                             etat_tpe?                  @relation("suivi_maintenance_tpe_diagnosticToetat_tpe", fields: [diagnostic], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  structure_suivi_maintenance_tpe_districtTostructure                             structure?                 @relation("suivi_maintenance_tpe_districtTostructure", fields: [district], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+  etat_tpe_suivi_maintenance_tpe_etat_panneToetat_tpe                             etat_tpe?                  @relation("suivi_maintenance_tpe_etat_panneToetat_tpe", fields: [etat_panne], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  mode_operation_tpe_suivi_maintenance_tpe_mode_operationTomode_operation_tpe     mode_operation_tpe?        @relation("suivi_maintenance_tpe_mode_operationTomode_operation_tpe", fields: [mode_operation], references: [libelle], onDelete: Cascade)
+  mode_operation_tpe_suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe mode_operation_tpe?        @relation("suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe", fields: [mode_operation_tpe], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  type_tpe                                                                        type_tpe?                  @relation(fields: [modele_tpe], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  station_suivi_maintenance_tpe_n_compte_bancaireTostation                        station?                   @relation("suivi_maintenance_tpe_n_compte_bancaireTostation", fields: [n_compte_bancaire], references: [n_compte_bancaire], onDelete: NoAction, onUpdate: NoAction)
+  structure_suivi_maintenance_tpe_structure_concerneTostructure                   structure?                 @relation("suivi_maintenance_tpe_structure_concerneTostructure", fields: [structure_concerne], references: [nom_structure], onDelete: NoAction, onUpdate: NoAction)
+  utilisateur                                                                     utilisateur?               @relation(fields: [valide_par], references: [email], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model email_queue {
+  id_email      Int           @id @default(autoincrement())
+  destinataire  String?       @db.VarChar(150)
+  sujet         String?       @db.VarChar(255)
+  corps_message String?
+  statut        String?       @default("EN_ATTENTE") @db.VarChar(20)
+  date_creation DateTime?     @default(now()) @db.Timestamp(6)
+  date_envoi    DateTime?     @db.Timestamp(6)
+  id_commande   Int?
+  commande_cib  commande_cib? @relation(fields: [id_commande], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ligne_commande_cib {
+  id_ligne                                                   Int           @id @default(autoincrement())
+  id_commande                                                Int?
+  modele_tpe                                                 String?       @db.VarChar(50)
+  quantite                                                   Int?          @default(1)
+  tarification                                               String?       @db.VarChar
+  id_tpe                                                     String?       @db.VarChar
+  commande_cib                                               commande_cib? @relation(fields: [id_commande], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  stock_tpe                                                  stock_tpe?    @relation(fields: [id_tpe], references: [idtpe], onDelete: NoAction, onUpdate: NoAction)
+  type_tpe                                                   type_tpe?     @relation(fields: [modele_tpe], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  tarification_ligne_commande_cib_tarificationTotarification tarification? @relation("ligne_commande_cib_tarificationTotarification", fields: [tarification], references: [libelle], onDelete: Cascade)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model utilisateur {
+  nom                                                     String?                 @db.VarChar(100)
+  prenom                                                  String?                 @db.VarChar(100)
+  email                                                   String                  @unique(map: "idx_util_email_final") @db.VarChar(150)
+  role                                                    String?                 @db.VarChar(20)
+  cree_par_id                                             Int?
+  date_creation                                           DateTime?               @default(now()) @db.Timestamp(6)
+  date_suppression                                        DateTime?               @db.Timestamp(6)
+  id_structure                                            Int?
+  id_utilisateur                                          Int                     @id @default(autoincrement())
+  mot_de_passe                                            String                  @db.VarChar(255)
+  structure_cree                                          String?                 @db.VarChar(255)
+  supprime                                                Boolean?                @default(false)
+  supprime_par                                            Int?
+  est_valide                                              Boolean?                @default(false)
+  code_structure                                          String?                 @db.VarChar
+  reset_password_expires                                  DateTime?               @db.Timestamp(6)
+  reset_password_token                                    String?                 @db.VarChar(255)
+  suivi_maintenance_tpe                                   suivi_maintenance_tpe[]
+  demandes_reinitialisation_mot_de_passe                  demande_reinitialisation_mot_de_passe[] @relation("reset_requests_user")
+  demandes_reinitialisation_traitees                      demande_reinitialisation_mot_de_passe[] @relation("reset_requests_admin")
+  utilisateur_utilisateur_supprime_parToutilisateur       utilisateur?            @relation("utilisateur_supprime_parToutilisateur", fields: [supprime_par], references: [id_utilisateur], onDelete: NoAction, onUpdate: NoAction, map: "fk_supprime_par")
+  other_utilisateur_utilisateur_supprime_parToutilisateur utilisateur[]           @relation("utilisateur_supprime_parToutilisateur")
+  utilisateur_utilisateur_cree_par_idToutilisateur        utilisateur?            @relation("utilisateur_cree_par_idToutilisateur", fields: [cree_par_id], references: [id_utilisateur], onDelete: NoAction, onUpdate: NoAction, map: "fk_utilisateur_createur")
+  other_utilisateur_utilisateur_cree_par_idToutilisateur  utilisateur[]           @relation("utilisateur_cree_par_idToutilisateur")
+  structure_utilisateur_code_structureTostructure         structure?              @relation("utilisateur_code_structureTostructure", fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  structure                                               structure?              @relation(fields: [id_structure], references: [idstructure], onDelete: NoAction, onUpdate: NoAction)
+  role_utilisateur_roleTorole                             role?                   @relation("utilisateur_roleTorole", fields: [role], references: [libelle], onDelete: Cascade)
+
+  @@index([id_structure])
+  @@index([role])
+  @@map("utilisateur")
+}
+
+model demande_reinitialisation_mot_de_passe {
+  id_demande           Int          @id @default(autoincrement())
+  id_utilisateur       Int
+  email_demande        String       @db.VarChar(150)
+  statut               String       @default("EN_ATTENTE") @db.VarChar(20)
+  date_demande         DateTime     @default(now()) @db.Timestamp(6)
+  date_validation      DateTime?    @db.Timestamp(6)
+  date_refus           DateTime?    @db.Timestamp(6)
+  date_reinitialisation DateTime?   @db.Timestamp(6)
+  traite_par           Int?
+  commentaire          String?
+  utilisateur          utilisateur  @relation("reset_requests_user", fields: [id_utilisateur], references: [id_utilisateur], onDelete: Cascade, onUpdate: NoAction)
+  admin                utilisateur? @relation("reset_requests_admin", fields: [traite_par], references: [id_utilisateur], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id_utilisateur])
+  @@index([statut])
+  @@index([date_demande])
+  @@map("demande_reinitialisation_mot_de_passe")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Status {
+  id           Int            @id @default(autoincrement())
+  libelle      String         @unique @db.VarChar
+  commande_cib commande_cib[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model circulation_carte {
+  id_circulation           Int                        @id @default(autoincrement())
+  numerocarte              String                     @db.VarChar(50)
+  district                 String?                    @db.VarChar(100)
+  code_structure           String?                    @db.VarChar(50)
+  raisonsocialestructure   String?                    @db.VarChar(255)
+  code_client              String?                    @db.VarChar(50)
+  raisonsocialeclient      String?                    @db.VarChar(255)
+  numero_decharge          String?                    @db.VarChar(50)
+  date_sortie              DateTime?                  @db.Date
+  amortissement            Int?
+  date_reception           DateTime?                  @db.Date
+  motmeth                  String?                    @db.VarChar
+  numero_porteur           String?                    @db.VarChar
+  etat                     String?                    @default("En_circulation") @db.VarChar
+  etat_carte               etat_carte?                @relation(fields: [etat], references: [libelle], onDelete: Cascade)
+  stock_carte              stock_carte                @relation(fields: [numerocarte], references: [numerocarte], onDelete: Cascade, onUpdate: NoAction, map: "fk_carte")
+  decharge_carte           decharge_carte?            @relation(fields: [numero_decharge], references: [numero_decharge], onDelete: NoAction, onUpdate: NoAction, map: "fk_decharge")
+  structure                structure?                 @relation(fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction, map: "fk_structure")
+  suivi_maintenance_cartes suivi_maintenance_cartes[]
+
+  @@index([code_structure])
+  @@index([etat])
+  @@index([numerocarte])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model circulation_tpe {
+  id_circulation                                     BigInt     @id @default(autoincrement())
+  district                                           String     @db.VarChar
+  code_structure                                     String?    @db.VarChar
+  raison_sociale_structure                           String?    @db.VarChar
+  wilaya                                             String?    @db.VarChar
+  code_station                                       String?    @db.VarChar
+  raison_sociale                                     String?    @db.VarChar
+  adresse                                            String?    @db.VarChar
+  numero_serie_tpe                                   String?    @unique @db.VarChar
+  id_tpe                                             String?    @db.VarChar
+  n_compte_bancaire                                  String?    @db.VarChar
+  date_reception                                     DateTime?  @db.Date
+  date_remise                                        DateTime?  @db.Date
+  date_expiration                                    DateTime?  @db.Date
+  amortissemant                                      Int?
+  dotation                                           String?    @db.VarChar
+  etat                                               String?    @default("En_circulation") @db.VarChar
+  nbr_chargeur                                       Int?
+  disponibilite_chargeur                             Boolean?
+  station_circulation_tpe_code_stationTostation      station?   @relation("circulation_tpe_code_stationTostation", fields: [code_station], references: [code_station], onDelete: NoAction, onUpdate: NoAction)
+  structure                                          structure? @relation(fields: [code_structure], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  type_tpe                                           type_tpe?  @relation(fields: [dotation], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  etat_tpe                                           etat_tpe?  @relation(fields: [etat], references: [libelle], onDelete: NoAction, onUpdate: NoAction)
+  station_circulation_tpe_n_compte_bancaireTostation station?   @relation("circulation_tpe_n_compte_bancaireTostation", fields: [n_compte_bancaire], references: [n_compte_bancaire], onDelete: Cascade)
+  stock_tpe                                          stock_tpe? @relation(fields: [numero_serie_tpe], references: [numeroserietpe], onDelete: Cascade)
+
+  @@index([code_structure])
+  @@index([etat])
+}
+
+model etat_carte {
+  id_etat                                                                    Int                          @id(map: "etat_pkey") @default(autoincrement())
+  libelle                                                                    String                       @unique(map: "etat_libelle_key") @db.VarChar(50)
+  description                                                                String?                      @db.VarChar(255)
+  circulation_carte                                                          circulation_carte[]
+  ligne_decharge_carte_type3                                                 ligne_decharge_carte_type3[]
+  stock_carte                                                                stock_carte[]
+  suivi_maintenance_cartes_suivi_maintenance_cartes_diagnostiqueToetat_carte suivi_maintenance_cartes[]   @relation("suivi_maintenance_cartes_diagnostiqueToetat_carte")
+  suivi_maintenance_cartes_suivi_maintenance_cartes_etat_panneToetat_carte   suivi_maintenance_cartes[]   @relation("suivi_maintenance_cartes_etat_panneToetat_carte")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model etat_tpe {
+  id_etat                                                          Int                        @id @default(autoincrement())
+  libelle                                                          String                     @unique @db.VarChar
+  description                                                      String?
+  circulation_tpe                                                  circulation_tpe[]
+  ligne_decharge_tpe_type3                                         ligne_decharge_tpe_type3[]
+  stock_tpe_stock_tpe_etat_tpeToetat_tpe                           stock_tpe[]                @relation("stock_tpe_etat_tpeToetat_tpe")
+  suivi_maintenance_tpe_suivi_maintenance_tpe_diagnosticToetat_tpe suivi_maintenance_tpe[]    @relation("suivi_maintenance_tpe_diagnosticToetat_tpe")
+  suivi_maintenance_tpe_suivi_maintenance_tpe_etat_panneToetat_tpe suivi_maintenance_tpe[]    @relation("suivi_maintenance_tpe_etat_panneToetat_tpe")
+}
+
+model mode_operation_carte {
+  id_mode                  Int                        @id(map: "mode_operation_pkey") @default(autoincrement())
+  libelle                  String?                    @unique(map: "mode_operation_libelle_key") @db.VarChar(100)
+  suivi_maintenance_cartes suivi_maintenance_cartes[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model mode_operation_tpe {
+  id_operation                                                                       Int                     @id @default(autoincrement())
+  libelle                                                                            String                  @unique @db.VarChar
+  suivi_maintenance_tpe_suivi_maintenance_tpe_mode_operationTomode_operation_tpe     suivi_maintenance_tpe[] @relation("suivi_maintenance_tpe_mode_operationTomode_operation_tpe")
+  suivi_maintenance_tpe_suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe suivi_maintenance_tpe[] @relation("suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe")
+}
+
+model role {
+  id_role                            Int           @id @default(autoincrement())
+  libelle                            String        @unique @db.VarChar(50)
+  utilisateur_utilisateur_roleTorole utilisateur[] @relation("utilisateur_roleTorole")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tarification {
+  id                                                               Int                  @id @default(autoincrement())
+  libelle                                                          String               @unique @db.VarChar
+  ligne_commande_cib_ligne_commande_cib_tarificationTotarification ligne_commande_cib[] @relation("ligne_commande_cib_tarificationTotarification")
+}
+
+model type_carte {
+  id_type                                        Int           @id @default(autoincrement())
+  libelle                                        String        @unique @db.VarChar(50)
+  stock_carte_stock_carte_type_carteTotype_carte stock_carte[] @relation("stock_carte_type_carteTotype_carte")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model type_tpe {
+  id_type_tpe           Int                     @id @default(autoincrement())
+  libelle               String                  @unique @db.VarChar
+  circulation_tpe       circulation_tpe[]
+  ligne_commande_cib    ligne_commande_cib[]
+  stock_tpe             stock_tpe[]
+  suivi_maintenance_tpe suivi_maintenance_tpe[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model audit_log {
+  id     BigInt    @id @default(autoincrement())
+  action String    @db.VarChar
+  target String?   @db.VarChar
+  user   String?   @db.VarChar
+  date   DateTime? @db.Timestamptz(6)
+  detail String?
+}
+
+model archivee_carte {
+  id_archive               Int                       @id @default(autoincrement())
+  numerocarte              String?                   @db.VarChar(50)
+  etat                     String?                   @db.VarChar(50)
+  district                 String?                   @db.VarChar(100)
+  code_structure           String?                   @db.VarChar(50)
+  code_client              String?                   @db.VarChar(50)
+  proprietaire             String?                   @db.VarChar(255)
+  bts                      String?                   @db.VarChar(100)
+  motif                    String?
+  archive_par              String?                   @db.VarChar(100)
+  date_archivage           DateTime                  @default(now())
+  id_suivi                 Int?
+  suivi_maintenance_cartes suivi_maintenance_cartes? @relation(fields: [id_suivi], references: [id_suivi])
+
+  @@index([date_archivage])
+  @@index([numerocarte])
+}

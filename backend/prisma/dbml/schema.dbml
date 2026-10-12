@@ -1,0 +1,783 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table structure {
+  idstructure Int [pk, increment]
+  code String [unique, not null]
+  nom_structure String [unique, not null]
+  type_structure String
+  adresse String
+  code_parent String
+  circulation_carte circulation_carte [not null]
+  circulation_tpe circulation_tpe [not null]
+  commande_cib commande_cib [not null]
+  ligne_decharge_carte_type1 ligne_decharge_carte_type1 [not null]
+  ligne_decharge_carte_type2_ligne_decharge_carte_type2_structureTostructure ligne_decharge_carte_type2 [not null]
+  ligne_decharge_carte_type3_ligne_decharge_carte_type3_structureTostructure ligne_decharge_carte_type3 [not null]
+  ligne_decharge_tpe_type1 ligne_decharge_tpe_type1 [not null]
+  ligne_decharge_tpe_type2_ligne_decharge_tpe_type2_structureTostructure ligne_decharge_tpe_type2 [not null]
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3 [not null]
+  ligne_decharge_tpe_type4_ligne_decharge_tpe_type4_str_ancienneTostructure ligne_decharge_tpe_type4 [not null]
+  ligne_decharge_tpe_type4_ligne_decharge_tpe_type4_str_nouvelleTostructure ligne_decharge_tpe_type4 [not null]
+  restitution_reconfig_tpe_restitution_reconfig_tpe_str_ancienneTostructure restitution_reconfig_tpe [not null]
+  restitution_reconfig_tpe_restitution_reconfig_tpe_str_nouvelleTostructure restitution_reconfig_tpe [not null]
+  station station [not null]
+  stock_carte stock_carte [not null]
+  stock_tpe_stock_tpe_code_structureTostructure stock_tpe [not null]
+  stock_tpe_stock_tpe_districtTostructure stock_tpe [not null]
+  structure structure
+  other_structure structure [not null]
+  suivi_maintenance_cartes suivi_maintenance_cartes [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_districtTostructure suivi_maintenance_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_structure_concerneTostructure suivi_maintenance_tpe [not null]
+  utilisateur utilisateur [not null]
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table commande_cib {
+  id Int [pk, increment]
+  numero_commande String [unique, not null]
+  code_station String
+  raison_sociale String
+  n_compte_bancaire String
+  date_commande DateTime
+  statut String [default: 'EN_COURS']
+  id_structure_emmetrice Int
+  id_validateur_dpe Int
+  date_validation DateTime
+  station station
+  structure structure
+  Status Status
+  email_queue email_queue [not null]
+  ligne_commande_cib ligne_commande_cib [not null]
+  stock_tpe stock_tpe [not null]
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table decharge_carte {
+  id_decharge_carte Int [pk, increment]
+  numero_decharge String [unique, not null]
+  source String
+  destination String
+  nom_beneficiaire String
+  fonction_beneficiaire String
+  date_sortie DateTime
+  date_creation DateTime
+  motif_transfert String
+  numero_bordereau_bts String
+  circulation_carte circulation_carte [not null]
+}
+
+Table decharge_tpe {
+  id_decharge_tpe Int [pk, increment]
+  numero_decharge String [unique, not null]
+  source String
+  destination String
+  nom_beneficiaire String
+  fonction_beneficiaire String
+  date_sortie DateTime
+  date_creation DateTime
+  numero_inventaire String
+  ligne_decharge_tpe_type1 ligne_decharge_tpe_type1 [not null]
+  ligne_decharge_tpe_type2 ligne_decharge_tpe_type2 [not null]
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3 [not null]
+  ligne_decharge_tpe_type4 ligne_decharge_tpe_type4 [not null]
+}
+
+Table historique_carte {
+  id_historique Int [pk, increment]
+  numerocarte String
+  ancienetat String
+  nouveletat String
+  dateoperation DateTime [default: `now()`]
+  commentaire String
+  id_utilisateur Int
+  structure_ancienne String
+  structure_actuelle String
+}
+
+Table historique_tpe {
+  id_historique Int [pk, increment]
+  numeroserietpe String
+  ancienetat String
+  nouveletat String
+  dateoperation DateTime [default: `now()`]
+  commentaire String
+  id_utilisateur Int
+}
+
+Table ligne_decharge_carte_type1 {
+  id_ligne_c1 Int [pk, increment]
+  numero_decharge String [not null]
+  numero_carte String
+  structure_concernee String
+  district_concerne String
+  commentaire String
+  code_client String
+  raisonsocialeclient String
+  stock_carte stock_carte
+  structure structure
+}
+
+Table ligne_decharge_carte_type2 {
+  id_ligne_c2 Int [pk, increment]
+  numero_decharge String
+  numero_carte String
+  anomalie_constatee String
+  raisonsocialeclient String
+  structure String
+  stock_carte stock_carte
+  structure_ligne_decharge_carte_type2_structureTostructure structure
+}
+
+Table ligne_decharge_carte_type3 {
+  id_ligne_c3 Int [pk, increment]
+  numero_decharge String
+  numero_carte_origine String
+  carte_substitution String
+  diagnostic_carte String
+  etat_final String
+  structure String
+  etat_carte etat_carte
+  stock_carte stock_carte
+  structure_ligne_decharge_carte_type3_structureTostructure structure
+}
+
+Table ligne_decharge_tpe_type1 {
+  id_ligne_t1 Int [pk, increment]
+  numero_decharge String [not null]
+  numero_serie_tpe String
+  id_tpe_logiciel String
+  structure_concernee String
+  district_concerne String
+  commentaire String
+  code_station String
+  raison_sociale String
+  station station
+  decharge_tpe decharge_tpe [not null]
+  stock_tpe stock_tpe
+  structure structure
+}
+
+Table ligne_decharge_tpe_type2 {
+  id_ligne_t2 Int [pk, increment]
+  numero_decharge String
+  numero_serie_tpe String
+  anomalie_constatee String
+  code_station String
+  structure String
+  raison_sociale String
+  station station
+  decharge_tpe decharge_tpe
+  stock_tpe stock_tpe
+  structure_ligne_decharge_tpe_type2_structureTostructure structure
+}
+
+Table ligne_decharge_tpe_type3 {
+  id_ligne_t3 Int [pk, increment]
+  numero_decharge String
+  numero_serie_tpe String
+  diagnostic_tpe String
+  etat_final String
+  numero_serietpe_substitution String
+  code_station String
+  raison_sociale String
+  n_serie_sim String
+  n_serie_sim_substitution String
+  structure_concerne String
+  station station
+  etat_tpe etat_tpe
+  decharge_tpe decharge_tpe
+  stock_tpe suivi_maintenance_tpe
+  structure structure
+}
+
+Table station {
+  idstation Int [pk, increment]
+  code_station String [unique, not null]
+  nom_station String
+  idstructure Int
+  district String
+  wilaya String
+  adresse String
+  n_compte_bancaire String [unique, not null]
+  circulation_tpe_circulation_tpe_code_stationTostation circulation_tpe [not null]
+  circulation_tpe_circulation_tpe_n_compte_bancaireTostation circulation_tpe [not null]
+  commande_cib commande_cib [not null]
+  ligne_decharge_tpe_type1 ligne_decharge_tpe_type1 [not null]
+  ligne_decharge_tpe_type2 ligne_decharge_tpe_type2 [not null]
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3 [not null]
+  ligne_decharge_tpe_type4 ligne_decharge_tpe_type4 [not null]
+  ligne_decharge_tpe_type4_ligne_decharge_tpe_type4_code_station_nouvelleTostation ligne_decharge_tpe_type4 [not null]
+  restitution_reconfig_tpe_restitution_reconfig_tpe_code_station_ancienneTostation restitution_reconfig_tpe [not null]
+  restitution_reconfig_tpe_restitution_reconfig_tpe_code_station_nouvelleTostation restitution_reconfig_tpe [not null]
+  structure structure
+  stock_carte stock_carte [not null]
+  stock_tpe stock_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_code_stationTostation suivi_maintenance_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_n_compte_bancaireTostation suivi_maintenance_tpe [not null]
+}
+
+Table stock_carte {
+  numerocarte String [pk]
+  idstation Int
+  district String
+  code_structure String
+  raisonsocialestructure String
+  code_client String
+  raisonsocialeclient String
+  numeroporteur String
+  libelle_entite String
+  motmeth String
+  date_reception DateTime
+  date_expiration DateTime
+  date_remise DateTime
+  amortissement Int
+  idstk String
+  statut String [default: 'Entree']
+  type_carte String
+  seuil_minimum Int [default: 10]
+  etat String [default: 'EN_STOCK']
+  id_porteur Int
+  nature_carte String
+  circulation_carte circulation_carte [not null]
+  ligne_decharge_carte_type1 ligne_decharge_carte_type1 [not null]
+  ligne_decharge_carte_type2 ligne_decharge_carte_type2 [not null]
+  ligne_decharge_carte_type3 ligne_decharge_carte_type3 [not null]
+  structure structure
+  etat_carte_stock_carte_etatToetat_carte etat_carte
+  station station
+  type_carte_stock_carte_type_carteTotype_carte type_carte
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table stock_tpe {
+  numeroserietpe String [pk]
+  idtpe String [unique]
+  operateur_mobile String
+  nomcommercial String
+  date_reception DateTime
+  date_expiration DateTime
+  amortissement Int
+  n_contrat String
+  adresse String
+  district String [not null]
+  code_structure String
+  raisonsocialestructure String
+  wilaya String
+  code_station String [not null]
+  numero_serie_sim String [not null]
+  adresse_IP_SIM String [not null]
+  n_telephone_SIM String [not null]
+  date_remise DateTime
+  dotation String [not null]
+  etat_tpe String [not null]
+  circulation_tpe circulation_tpe
+  ligne_commande_cib ligne_commande_cib [not null]
+  ligne_decharge_tpe_type1 ligne_decharge_tpe_type1 [not null]
+  ligne_decharge_tpe_type2 ligne_decharge_tpe_type2 [not null]
+  ligne_decharge_tpe_type4 ligne_decharge_tpe_type4 [not null]
+  station station [not null]
+  structure_stock_tpe_code_structureTostructure structure
+  structure_stock_tpe_districtTostructure structure [not null]
+  type_tpe type_tpe [not null]
+  etat_relation etat_tpe [not null]
+  commande_cib commande_cib
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table suivi_maintenance_cartes {
+  id_suivi Int [pk, increment]
+  district String
+  numerocarte String
+  date_anomalie DateTime
+  etat_panne String
+  numerocartesubstitution String
+  trs_dcsi_dpe DateTime
+  trs_dpe_dcsi DateTime
+  trs_dpe_str DateTime
+  trs_str_dpe DateTime
+  code_structure String
+  raisonsocialestructure String
+  code_client String
+  raisonsocialeclient String
+  id_mode Int
+  diagnostique String
+  objet_dia String
+  duree_trait Int
+  duree_imobil Int
+  valide_par String
+  date_validation DateTime
+  id_circulation Int
+  circulation_carte circulation_carte
+  mode_operation_carte mode_operation_carte
+  structure structure
+  etat_carte_suivi_maintenance_cartes_diagnostiqueToetat_carte etat_carte
+  etat_carte_suivi_maintenance_cartes_etat_panneToetat_carte etat_carte
+}
+
+Table suivi_maintenance_tpe {
+  id_suivi Int [pk, increment]
+  idtpe String
+  date_panne DateTime
+  diagnostic String
+  etat_panne String [default: 'EN_COURS']
+  duree_trait Int
+  duree_immobilisation Int
+  code_station String [not null]
+  raisonsociale String [not null]
+  numeroserietpe String [unique]
+  n_compte_bancaire String
+  modele_tpe String
+  objet_dia String
+  trs_st_str DateTime
+  trs_str_dpe DateTime
+  trs_dpe_bea DateTime [not null]
+  trs_bea_dpe DateTime [not null]
+  trs_dpe_str DateTime
+  trs_str_st DateTime
+  n_serie_tpe_substitution String
+  n_serie_sim_substitution String
+  mode_operation_tpe String
+  mode_operation String
+  valide_par String
+  date_validation DateTime
+  district String
+  structure_concerne String
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3 [not null]
+  station_suivi_maintenance_tpe_code_stationTostation station [not null]
+  etat_tpe_suivi_maintenance_tpe_diagnosticToetat_tpe etat_tpe
+  structure_suivi_maintenance_tpe_districtTostructure structure
+  etat_tpe_suivi_maintenance_tpe_etat_panneToetat_tpe etat_tpe
+  mode_operation_tpe_suivi_maintenance_tpe_mode_operationTomode_operation_tpe mode_operation_tpe
+  mode_operation_tpe_suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe mode_operation_tpe
+  type_tpe type_tpe
+  station_suivi_maintenance_tpe_n_compte_bancaireTostation station
+  structure_suivi_maintenance_tpe_structure_concerneTostructure structure
+  utilisateur utilisateur
+}
+
+Table email_queue {
+  id_email Int [pk, increment]
+  destinataire String
+  sujet String
+  corps_message String
+  statut String [default: 'EN_ATTENTE']
+  date_creation DateTime [default: `now()`]
+  date_envoi DateTime
+  id_commande Int
+  commande_cib commande_cib
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table ligne_commande_cib {
+  id_ligne Int [pk, increment]
+  id_commande Int
+  modele_tpe String
+  quantite Int [default: 1]
+  tarification String
+  id_tpe String
+  commande_cib commande_cib
+  stock_tpe stock_tpe
+  type_tpe type_tpe
+  tarification_ligne_commande_cib_tarificationTotarification tarification
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table utilisateur {
+  nom String
+  prenom String
+  email String [unique, not null]
+  role String
+  cree_par_id Int
+  date_creation DateTime [default: `now()`]
+  date_suppression DateTime
+  id_structure Int
+  id_utilisateur Int [pk, increment]
+  mot_de_passe String [not null]
+  structure_cree String
+  supprime Boolean [default: false]
+  supprime_par Int
+  est_valide Boolean [default: false]
+  suivi_maintenance_tpe suivi_maintenance_tpe [not null]
+  utilisateur_utilisateur_supprime_parToutilisateur utilisateur
+  other_utilisateur_utilisateur_supprime_parToutilisateur utilisateur [not null]
+  utilisateur utilisateur
+  other_utilisateur utilisateur [not null]
+  structure structure
+  role_utilisateur_roleTorole role
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.'
+}
+
+Table circulation_carte {
+  id_circulation Int [pk, increment]
+  numerocarte String [not null]
+  district String
+  code_structure String
+  raisonsocialestructure String
+  code_client String
+  raisonsocialeclient String
+  numero_decharge String
+  date_sortie DateTime
+  amortissement Int
+  date_reception DateTime
+  motmeth String
+  numero_porteur String
+  etat String [default: 'En_circulation']
+  etat_carte etat_carte
+  stock_carte stock_carte [not null]
+  decharge_carte decharge_carte
+  structure structure
+  suivi_maintenance_cartes suivi_maintenance_cartes [not null]
+
+  Note: 'This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments'
+}
+
+Table circulation_tpe {
+  id_circulation BigInt [pk, increment]
+  district String [not null]
+  code_structure String
+  raison_sociale_structure String
+  wilaya String
+  code_station String
+  raison_sociale String
+  adresse String
+  numero_serie_tpe String [unique]
+  id_tpe String
+  n_compte_bancaire String
+  date_reception DateTime
+  date_remise DateTime
+  date_expiration DateTime
+  amortissemant Int
+  dotation String
+  etat String [default: 'En_circulation']
+  nbr_chargeur Int
+  disponibilite_chargeur Boolean
+  station_circulation_tpe_code_stationTostation station
+  structure structure
+  type_tpe type_tpe
+  etat_carte etat_tpe
+  station_circulation_tpe_n_compte_bancaireTostation station
+  stock_tpe stock_tpe
+  restitution_reconfig_tpe_restitution_reconfig_tpe_id_resTocirculation_tpe restitution_reconfig_tpe
+  restitution_reconfig_tpe_restitution_reconfig_tpe_n_serie_tpeTocirculation_tpe restitution_reconfig_tpe
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table etat_carte {
+  id_etat Int [pk, increment]
+  libelle String [unique, not null]
+  description String
+  circulation_carte circulation_carte [not null]
+  ligne_decharge_carte_type3 ligne_decharge_carte_type3 [not null]
+  stock_carte_stock_carte_etatToetat_carte stock_carte [not null]
+  suivi_maintenance_cartes_suivi_maintenance_cartes_diagnostiqueToetat_carte suivi_maintenance_cartes [not null]
+  suivi_maintenance_cartes_suivi_maintenance_cartes_etat_panneToetat_carte suivi_maintenance_cartes [not null]
+}
+
+Table etat_tpe {
+  id_etat Int [pk, increment]
+  libelle String [unique, not null]
+  description String
+  circulation_tpe circulation_tpe [not null]
+  ligne_decharge_tpe_type3 ligne_decharge_tpe_type3 [not null]
+  restitution_reconfig_tpe restitution_reconfig_tpe [not null]
+  stock_tpe stock_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_diagnosticToetat_tpe suivi_maintenance_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_etat_panneToetat_tpe suivi_maintenance_tpe [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table mode_operation_carte {
+  id_mode Int [pk, increment]
+  libelle String [unique]
+  suivi_maintenance_cartes suivi_maintenance_cartes [not null]
+}
+
+Table mode_operation_tpe {
+  id_operation Int [pk, increment]
+  libelle String [unique, not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_mode_operationTomode_operation_tpe suivi_maintenance_tpe [not null]
+  suivi_maintenance_tpe_suivi_maintenance_tpe_mode_operation_tpeTomode_operation_tpe suivi_maintenance_tpe [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table restitution_reconfig_tpe {
+  id_res BigInt [pk, increment]
+  code_station_ancienne String
+  raison_sociale_ancienne String
+  n_serie_tpe String [unique, not null]
+  modele_tpe String
+  motif_restitution String
+  operateur_mobile String
+  n_serie_sim String
+  adresse_IP_SIM String
+  trs_st1_str DateTime
+  trs_str_dpe DateTime
+  trs_dpe_bea DateTime
+  trs_bea_dpe DateTime
+  trs_dpe_str DateTime
+  trs_str_st2 DateTime
+  code_station_nouvelle String
+  raison_sociale_nouvelle String
+  duree_trait DateTime
+  duree_imobil DateTime
+  etat String
+  str_ancienne String
+  str_nouvelle String
+  ligne_decharge_tpe_type4 ligne_decharge_tpe_type4
+  station_restitution_reconfig_tpe_code_station_ancienneTostation station
+  station_restitution_reconfig_tpe_code_station_nouvelleTostation station
+  etat_tpe etat_tpe
+  circulation_tpe_restitution_reconfig_tpe_id_resTocirculation_tpe circulation_tpe [not null]
+  type_tpe type_tpe
+  circulation_tpe_restitution_reconfig_tpe_n_serie_tpeTocirculation_tpe circulation_tpe [not null]
+  structure_restitution_reconfig_tpe_str_ancienneTostructure structure
+  structure_restitution_reconfig_tpe_str_nouvelleTostructure structure
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table role {
+  id_role Int [pk, increment]
+  libelle String [unique, not null]
+  utilisateur_utilisateur_roleTorole utilisateur [not null]
+}
+
+Table type_carte {
+  id_type Int [pk, increment]
+  libelle String [unique, not null]
+  stock_carte_stock_carte_type_carteTotype_carte stock_carte [not null]
+}
+
+Table type_tpe {
+  id_type_tpe Int [pk, increment]
+  libelle String [unique, not null]
+  circulation_tpe circulation_tpe [not null]
+  ligne_commande_cib ligne_commande_cib [not null]
+  restitution_reconfig_tpe restitution_reconfig_tpe [not null]
+  stock_tpe stock_tpe [not null]
+  suivi_maintenance_tpe suivi_maintenance_tpe [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table Status {
+  id Int [pk, increment]
+  libelle String [unique, not null]
+  commande_cib commande_cib [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table ligne_decharge_tpe_type4 {
+  id_ligne_type4 BigInt [pk, increment]
+  numero_decharge String [not null]
+  code_station_ancienne String
+  raison_sociale_ancienne String
+  raison_sociale_nouvelle String
+  code_station_nouvelle String
+  motif_restitution String
+  str_ancienne String
+  str_nouvelle String
+  numeroserietpe String
+  n_serie_sim String
+  station station
+  station_ligne_decharge_tpe_type4_code_station_nouvelleTostation station
+  restitution_reconfig_tpe restitution_reconfig_tpe [not null]
+  decharge_tpe decharge_tpe [not null]
+  stock_tpe stock_tpe
+  structure_ligne_decharge_tpe_type4_str_ancienneTostructure structure
+  structure_ligne_decharge_tpe_type4_str_nouvelleTostructure structure
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table tarification {
+  id Int [pk, increment]
+  libelle String [unique, not null]
+  ligne_commande_cib_ligne_commande_cib_tarificationTotarification ligne_commande_cib [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Ref: structure.code_parent - structure.code [delete: No Action]
+
+Ref: commande_cib.code_station > station.code_station [delete: No Action]
+
+Ref: commande_cib.id_structure_emmetrice > structure.idstructure [delete: No Action]
+
+Ref: commande_cib.statut > Status.libelle [delete: No Action]
+
+Ref: ligne_decharge_carte_type1.numero_carte > stock_carte.numerocarte [delete: No Action]
+
+Ref: ligne_decharge_carte_type1.structure_concernee > structure.nom_structure [delete: No Action]
+
+Ref: ligne_decharge_carte_type2.numero_carte > stock_carte.numerocarte [delete: No Action]
+
+Ref: ligne_decharge_carte_type2.structure > structure.code [delete: No Action]
+
+Ref: ligne_decharge_carte_type3.etat_final > etat_carte.libelle [delete: No Action]
+
+Ref: ligne_decharge_carte_type3.numero_carte_origine > stock_carte.numerocarte [delete: No Action]
+
+Ref: ligne_decharge_carte_type3.structure > structure.nom_structure [delete: No Action]
+
+Ref: ligne_decharge_tpe_type1.code_station > station.code_station [delete: No Action]
+
+Ref: ligne_decharge_tpe_type1.numero_decharge > decharge_tpe.numero_decharge [delete: No Action]
+
+Ref: ligne_decharge_tpe_type1.numero_serie_tpe > stock_tpe.numeroserietpe [delete: No Action]
+
+Ref: ligne_decharge_tpe_type1.structure_concernee > structure.nom_structure [delete: No Action]
+
+Ref: ligne_decharge_tpe_type2.code_station > station.code_station [delete: No Action]
+
+Ref: ligne_decharge_tpe_type2.numero_decharge > decharge_tpe.numero_decharge [delete: No Action]
+
+Ref: ligne_decharge_tpe_type2.numero_serie_tpe > stock_tpe.numeroserietpe [delete: No Action]
+
+Ref: ligne_decharge_tpe_type2.structure > structure.code [delete: No Action]
+
+Ref: ligne_decharge_tpe_type3.code_station > station.code_station [delete: No Action]
+
+Ref: ligne_decharge_tpe_type3.etat_final > etat_tpe.libelle [delete: No Action]
+
+Ref: ligne_decharge_tpe_type3.numero_decharge > decharge_tpe.numero_decharge [delete: No Action]
+
+Ref: ligne_decharge_tpe_type3.numero_serie_tpe > suivi_maintenance_tpe.numeroserietpe [delete: No Action]
+
+Ref: ligne_decharge_tpe_type3.structure_concerne > structure.nom_structure [delete: No Action]
+
+Ref: station.idstructure > structure.idstructure [delete: No Action]
+
+Ref: stock_carte.code_structure > structure.code [delete: No Action]
+
+Ref: stock_carte.etat > etat_carte.libelle [delete: Cascade]
+
+Ref: stock_carte.idstation > station.idstation [delete: No Action]
+
+Ref: stock_carte.type_carte > type_carte.libelle [delete: Cascade]
+
+Ref: stock_tpe.code_station > station.code_station [delete: No Action]
+
+Ref: stock_tpe.code_structure > structure.code [delete: No Action]
+
+Ref: stock_tpe.district > structure.nom_structure [delete: No Action]
+
+Ref: stock_tpe.dotation > type_tpe.libelle [delete: Cascade]
+
+Ref: stock_tpe.etat_tpe > etat_tpe.libelle [delete: Cascade]
+
+Ref: stock_tpe.n_contrat > commande_cib.numero_commande [delete: No Action]
+
+Ref: suivi_maintenance_cartes.id_circulation > circulation_carte.id_circulation [delete: No Action]
+
+Ref: suivi_maintenance_cartes.id_mode > mode_operation_carte.id_mode [delete: No Action]
+
+Ref: suivi_maintenance_cartes.code_structure > structure.code [delete: No Action]
+
+Ref: suivi_maintenance_cartes.diagnostique > etat_carte.libelle [delete: No Action]
+
+Ref: suivi_maintenance_cartes.etat_panne > etat_carte.libelle [delete: No Action]
+
+Ref: suivi_maintenance_tpe.code_station > station.code_station [delete: No Action]
+
+Ref: suivi_maintenance_tpe.diagnostic > etat_tpe.libelle [delete: No Action]
+
+Ref: suivi_maintenance_tpe.district > structure.nom_structure [delete: No Action]
+
+Ref: suivi_maintenance_tpe.etat_panne > etat_tpe.libelle [delete: No Action]
+
+Ref: suivi_maintenance_tpe.mode_operation > mode_operation_tpe.libelle [delete: Cascade]
+
+Ref: suivi_maintenance_tpe.mode_operation_tpe > mode_operation_tpe.libelle [delete: Cascade]
+
+Ref: suivi_maintenance_tpe.modele_tpe > type_tpe.libelle [delete: No Action]
+
+Ref: suivi_maintenance_tpe.n_compte_bancaire > station.n_compte_bancaire [delete: No Action]
+
+Ref: suivi_maintenance_tpe.structure_concerne > structure.nom_structure [delete: No Action]
+
+Ref: suivi_maintenance_tpe.valide_par > utilisateur.email [delete: No Action]
+
+Ref: email_queue.id_commande > commande_cib.id [delete: No Action]
+
+Ref: ligne_commande_cib.id_commande > commande_cib.id [delete: Cascade]
+
+Ref: ligne_commande_cib.id_tpe > stock_tpe.idtpe [delete: No Action]
+
+Ref: ligne_commande_cib.modele_tpe > type_tpe.libelle [delete: No Action]
+
+Ref: ligne_commande_cib.tarification > tarification.libelle [delete: Cascade]
+
+Ref: utilisateur.supprime_par - utilisateur.id_utilisateur [delete: No Action]
+
+Ref: utilisateur.cree_par_id - utilisateur.id_utilisateur [delete: No Action]
+
+Ref: utilisateur.id_structure > structure.idstructure [delete: No Action]
+
+Ref: utilisateur.role > role.libelle [delete: Cascade]
+
+Ref: circulation_carte.etat > etat_carte.libelle [delete: Cascade]
+
+Ref: circulation_carte.numerocarte > stock_carte.numerocarte [delete: Cascade]
+
+Ref: circulation_carte.numero_decharge > decharge_carte.numero_decharge [delete: No Action]
+
+Ref: circulation_carte.code_structure > structure.code [delete: No Action]
+
+Ref: circulation_tpe.code_station > station.code_station [delete: No Action]
+
+Ref: circulation_tpe.code_structure > structure.code [delete: No Action]
+
+Ref: circulation_tpe.dotation > type_tpe.libelle [delete: No Action]
+
+Ref: circulation_tpe.etat > etat_tpe.libelle [delete: No Action]
+
+Ref: circulation_tpe.n_compte_bancaire > station.n_compte_bancaire [delete: No Action]
+
+Ref: circulation_tpe.numero_serie_tpe - stock_tpe.numeroserietpe [delete: Cascade]
+
+Ref: restitution_reconfig_tpe.code_station_ancienne > station.code_station [delete: No Action]
+
+Ref: restitution_reconfig_tpe.code_station_nouvelle > station.code_station [delete: No Action]
+
+Ref: restitution_reconfig_tpe.etat > etat_tpe.libelle [delete: No Action]
+
+Ref: restitution_reconfig_tpe.id_res - circulation_tpe.id_circulation [delete: No Action]
+
+Ref: restitution_reconfig_tpe.modele_tpe > type_tpe.libelle [delete: No Action]
+
+Ref: restitution_reconfig_tpe.n_serie_tpe - circulation_tpe.numero_serie_tpe [delete: No Action]
+
+Ref: restitution_reconfig_tpe.str_ancienne > structure.code [delete: No Action]
+
+Ref: restitution_reconfig_tpe.str_nouvelle > structure.code [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.code_station_ancienne > station.code_station [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.code_station_nouvelle > station.code_station [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.id_ligne_type4 - restitution_reconfig_tpe.id_res [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.numero_decharge > decharge_tpe.numero_decharge [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.numeroserietpe > stock_tpe.numeroserietpe [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.str_ancienne > structure.nom_structure [delete: No Action]
+
+Ref: ligne_decharge_tpe_type4.str_nouvelle > structure.nom_structure [delete: No Action]

@@ -1,0 +1,2 @@
+
+core.js : renderDashboard

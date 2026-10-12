@@ -1,0 +1,219 @@
+[dotenv@17.3.1] injecting env (5) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Serveur NAFTAL démarré sur http://localhost:8081
+✅ DB connectée :)
+
+[LOGIN] ── début pour sofia@gmail.com ──
+[LOGIN] findUnique(email)        543 ms  |  total 543 ms
+[LOGIN] bcrypt.compare           109 ms  |  total 652 ms
+[LOGIN] jwt.sign                   3 ms  |  total 655 ms
+[LOGIN] res.json envoyé            3 ms  |  total 658 ms
+[LOGIN] ✓ TOTAL côté serveur: 658 ms
+
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/circulation
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/parc
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[LOGIN] audit (async) écrit en 395 ms
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      1 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  DELETE /api/archives/12
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+
+[LOGIN] ── début pour sofia@gmail.com ──
+[LOGIN] findUnique(email)        374 ms  |  total 374 ms
+[LOGIN] bcrypt.compare            72 ms  |  total 446 ms
+[LOGIN] jwt.sign                   2 ms  |  total 448 ms
+[LOGIN] res.json envoyé            0 ms  |  total 448 ms
+[LOGIN] ✓ TOTAL côté serveur: 449 ms
+
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/circulation
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/parc
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[LOGIN] audit (async) écrit en 363 ms
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  PUT /api/cartes/NC-48/etat
+changerEtat appelé: { id: 'NC-48', etat: 'Défectueuse', statut: undefined }
+ETATS_SUIVI déclenché pour: Défectueuse
+[AUTH] cache MISS         id=77    366 ms  GET /api/cartes/stock
+[AUTH] cache WAIT (dedup) id=77    377 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache WAIT (dedup) id=77    376 ms  GET /api/cartes/circulation
+[AUTH] cache WAIT (dedup) id=77    376 ms  GET /api/tpe/stock
+[AUTH] cache WAIT (dedup) id=77    376 ms  GET /api/tpe/parc
+[AUTH] cache WAIT (dedup) id=77    375 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  POST /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+
+[LOGIN] ── début pour sofia@gmail.com ──
+[LOGIN] findUnique(email)        441 ms  |  total 441 ms
+[LOGIN] bcrypt.compare            85 ms  |  total 526 ms
+[LOGIN] jwt.sign                   1 ms  |  total 527 ms
+[LOGIN] res.json envoyé            1 ms  |  total 528 ms
+[LOGIN] ✓ TOTAL côté serveur: 528 ms
+
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/circulation
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/parc
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[LOGIN] audit (async) écrit en 359 ms
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  DELETE /api/archives/13
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache MISS         id=77    362 ms  PUT /api/cartes/NC-71/etat
+changerEtat appelé: { id: 'NC-71', etat: 'Défectueuse', statut: undefined }
+ETATS_SUIVI déclenché pour: Défectueuse
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/circulation
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/parc
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache MISS         id=77    516 ms  POST /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  DELETE /api/archives/14
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  POST /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  POST /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache MISS         id=77    476 ms  DELETE /api/archives/16
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  DELETE /api/archives/15
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  POST /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  DELETE /api/archives
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+
+[LOGIN] ── début pour sofia@gmail.com ──
+[LOGIN] findUnique(email)        456 ms  |  total 456 ms
+[LOGIN] bcrypt.compare            73 ms  |  total 529 ms
+[LOGIN] jwt.sign                   2 ms  |  total 531 ms
+[LOGIN] res.json envoyé            0 ms  |  total 531 ms
+[LOGIN] ✓ TOTAL côté serveur: 532 ms
+
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance-stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/circulation
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stock
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/parc
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[LOGIN] audit (async) écrit en 373 ms
+[AUTH] cache HIT       id=77      0 ms  GET /api/decharges/liste
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/transferts
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/commandes
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/users
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/maintenance
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/types-tpe
+[AUTH] cache HIT       id=77      0 ms  GET /api/cartes/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/suivi
+[AUTH] cache HIT       id=77      0 ms  GET /api/archives
+[AUTH] cache HIT       id=77      0 ms  GET /api/structure
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
+[AUTH] cache HIT       id=77      0 ms  GET /api/dashboard/global
+[AUTH] cache HIT       id=77      0 ms  POST /api/auth/add-audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/auth/audit
+[AUTH] cache HIT       id=77      0 ms  GET /api/tpe/stations
